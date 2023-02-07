@@ -1,0 +1,3 @@
+RewriteEngine On
+Options All -Indexes
+RewriteRule ^(.*)$ home.php [L]
