@@ -1,50 +1,53 @@
 <?php
-if (!isset($_SESSION)) session_start();
-
-$pathStorage = $_SERVER["DOCUMENT_ROOT"] . "/../files/";
-$pathConfig = $_SERVER["DOCUMENT_ROOT"] . "/../config/config.json";
-
-$config = json_decode(file_get_contents($pathConfig), true); // Load config
-if (!$config) die("Config loading failed."); // Config load error
-$db = mysqli_connect($config["db_host"], $config["db_username"], $config["db_password"], $config["db_name"]); // Connect to database
-if (!$db) die("Database connection failed."); // Database connection error
+// Load config
+require_once($_SERVER["DOCUMENT_ROOT"] . "/../config/config.php");
 
 if (!empty($_POST["submit"])) {
+	addShare();
+}
+
+// Add a new share
+function addShare()
+{
+	$db = mysqli_connect(config::dbHost(), config::dbUsername(), config::dbPassword(), config::dbName());
+	if (!$db) die("Database connection failed."); // Database connection error
 	$uri = mysqli_real_escape_string($db, $_POST["uri"]);
 	$expireDate = mysqli_real_escape_string($db, $_POST["expireDate"]);
 	if ($_FILES["file"]["name"]) {
-		echo "Uploading...<br>";
 		$fileName = mysqli_real_escape_string($db, $_FILES["file"]["name"]);
 		$fileMime = getMime(mysqli_real_escape_string($db, $fileName));
-		$addToDatabase = mysqli_prepare($db, "INSERT IGNORE INTO webshare (uri, fileName, fileMime, expireDate) VALUES (?, ?, ?, ?)");
-		mysqli_stmt_bind_param($addToDatabase, "ssss", $uri, $fileName, $fileMime, $expireDate);
-		mysqli_stmt_execute($addToDatabase);
-		if (mysqli_stmt_affected_rows($addToDatabase)) {
-			move_uploaded_file($_FILES["file"]["tmp_name"], $pathStorage . $uri);
-			echo "Upload Successful<br>";
-		} else {
-			echo "Error<br>";
+		$addShare = mysqli_prepare($db, "INSERT IGNORE INTO " . config::dbTableWebshare() . " (uri, fileName, fileMime, expireDate) VALUES (?, ?, ?, ?)");
+		mysqli_stmt_bind_param($addShare, "ssss", $uri, $fileName, $fileMime, $expireDate);
+		mysqli_stmt_execute($addShare);
+		if (mysqli_stmt_affected_rows($addShare)) {
+			move_uploaded_file($_FILES["file"]["tmp_name"], config::dbTableWebshare() . $uri);
+			mysqli_close($db);
+			return ("Share erfolgreich hinzugefügt.");
 		}
-	} else if (!empty($_POST["link"])) {
-		echo "Adding...<br>";
-		$link = mysqli_real_escape_string($db, $_POST["link"]);
-		$addToDatabase = mysqli_prepare($db, "INSERT IGNORE INTO webshare (uri, link, expireDate) VALUES (?, ?, ?)");
-		mysqli_stmt_bind_param($addToDatabase, "sss", $uri, $link, $expireDate);
-		mysqli_stmt_execute($addToDatabase);
-		if (mysqli_stmt_affected_rows($addToDatabase)) {
-			echo "Adding Successful<br>";
-		} else {
-			echo "Error<br>";
-		}
-	} else {
-		echo "Error";
+		mysqli_close($db);
+		return ("Share hinzufügen fehlgeschlagen: URI kann nicht benutzt werden, bitte andere wählen.");
 	}
+	if (!empty($_POST["link"])) {
+		$link = mysqli_real_escape_string($db, $_POST["link"]);
+		$addShare = mysqli_prepare($db, "INSERT IGNORE INTO " . config::dbTableWebshare() . " (uri, link, expireDate) VALUES (?, ?, ?)");
+		mysqli_stmt_bind_param($addShare, "sss", $uri, $link, $expireDate);
+		mysqli_stmt_execute($addShare);
+		if (mysqli_stmt_affected_rows($addShare)) {
+			mysqli_close($db);
+			return ("Share erfolgreich hinzugefügt.");
+		}
+		mysqli_close($db);
+		return ("Share hinzufügen fehlgeschlagen: URI kann nicht benutzt werden, bitte andere wählen.");
+	}
+	mysqli_close($db);
+	return ("Share hinzufügen fehlgeschlagen.");
 }
-mysqli_close($db);
 
+// Get mime type of file
 function getMime($file)
 {
-	$mimeTypes = array( // List of mime types depending on file extension
+	$mimeTypes = array(
+		// List of mime types depending on file extension
 		"php" => "text/html",
 		"html" => "text/html",
 		"css" => "text/css",

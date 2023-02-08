@@ -1,14 +1,10 @@
 <?php
-require_once("main.php");
+// Load config and connect to database
+require_once($_SERVER["DOCUMENT_ROOT"] . "/../config/config.php");
+$db = mysqli_connect(config::dbHost(), config::dbUsername(), config::dbPassword(), config::dbName());
+if (!$db) die("Database connection failed.");
 
-$pathStorage = $_SERVER["DOCUMENT_ROOT"] . "/../files/";
-$pathConfig = $_SERVER["DOCUMENT_ROOT"] . "/../config/config.json";
-
-$config = json_decode(file_get_contents($pathConfig), true); // Load config
-if (!$config) die("Config loading failed."); // Config load error
-$db = mysqli_connect($config["db_host"], $config["db_username"], $config["db_password"], $config["db_name"]); // Connect to database
-if (!$db) die("Database connection failed."); // Database connection error
-
+// Get request and exempt admin page
 $request = mysqli_real_escape_string($db, $_SERVER["REQUEST_URI"]);
 $request = substr($request, 1);
 if (str_starts_with($request, "admin")) {
@@ -16,25 +12,29 @@ if (str_starts_with($request, "admin")) {
 	require("admin.php");
 	exit;
 }
-$getRedirect = mysqli_prepare($db, "SELECT * FROM webshare WHERE uri=? LIMIT 1");
-mysqli_stmt_bind_param($getRedirect, "s", $request);
-mysqli_stmt_execute($getRedirect);
-$redirect = mysqli_fetch_assoc(mysqli_stmt_get_result($getRedirect));
-if (isset($redirect["link"])) {
-	header("Location:" . $redirect["link"]);
+
+// Lookup request in database and redirect to link or file
+$getShare = mysqli_prepare($db, "SELECT * FROM " . config::dbTableWebshare() . " WHERE uri=? LIMIT 1");
+mysqli_stmt_bind_param($getShare, "s", $request);
+mysqli_stmt_execute($getShare);
+$share = mysqli_fetch_assoc(mysqli_stmt_get_result($getShare));
+if (isset($share["link"])) {
+	header("Location:" . $share["link"]);
 	exit;
 }
-if (isset($redirect["fileName"]) && isset($redirect["fileName"])) {
-	$file = $pathStorage . $redirect["uri"];
+if (isset($share["fileName"]) && isset($share["fileName"])) {
+	$file = $pathStorage . $share["uri"];
 	if (!file_exists($file)) {
 		header("HTTP/1.0 404 Not Found");
 		echo "Error";
 		exit;
 	}
-	header("Content-Disposition: attachment; filename=" . $redirect["fileName"]);
-	header("Content-Type: " . $redirect["fileMime"]);
+	header("Content-Disposition: attachment; filename=" . $share["fileName"]);
+	header("Content-Type: " . $share["fileMime"]);
 	require($file);
 	exit;
 }
+
+// Throw error if request is not found
 header("HTTP/1.0 404 Not Found");
 echo "Error 404";
