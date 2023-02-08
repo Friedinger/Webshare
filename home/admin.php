@@ -13,19 +13,29 @@ if (!empty($_POST["submit"])) {
 	$uri = mysqli_real_escape_string($db, $_POST["uri"]);
 	$expireDate = mysqli_real_escape_string($db, $_POST["expireDate"]);
 	if ($_FILES["file"]["name"]) {
-		echo "Uploading...";
+		echo "Uploading...<br>";
 		$fileName = mysqli_real_escape_string($db, $_FILES["file"]["name"]);
 		$fileMime = getMime(mysqli_real_escape_string($db, $fileName));
-		$addToDatabase = mysqli_prepare($db, "INSERT INTO webshare (uri, fileName, fileMime, expireDate) VALUES (?, ?, ?, ?)");
+		$addToDatabase = mysqli_prepare($db, "INSERT IGNORE INTO webshare (uri, fileName, fileMime, expireDate) VALUES (?, ?, ?, ?)");
 		mysqli_stmt_bind_param($addToDatabase, "ssss", $uri, $fileName, $fileMime, $expireDate);
 		mysqli_stmt_execute($addToDatabase);
-		move_uploaded_file($_FILES["file"]["tmp_name"], $pathStorage . $uri);
+		if (mysqli_stmt_affected_rows($addToDatabase)) {
+			move_uploaded_file($_FILES["file"]["tmp_name"], $pathStorage . $uri);
+			echo "Upload Successful<br>";
+		} else {
+			echo "Error<br>";
+		}
 	} else if (!empty($_POST["link"])) {
-		echo "Adding...";
+		echo "Adding...<br>";
 		$link = mysqli_real_escape_string($db, $_POST["link"]);
-		$addToDatabase = mysqli_prepare($db, "INSERT INTO webshare (uri, link, expireDate) VALUES (?, ?, ?)");
+		$addToDatabase = mysqli_prepare($db, "INSERT IGNORE INTO webshare (uri, link, expireDate) VALUES (?, ?, ?)");
 		mysqli_stmt_bind_param($addToDatabase, "sss", $uri, $link, $expireDate);
 		mysqli_stmt_execute($addToDatabase);
+		if (mysqli_stmt_affected_rows($addToDatabase)) {
+			echo "Adding Successful<br>";
+		} else {
+			echo "Error<br>";
+		}
 	} else {
 		echo "Error";
 	}
