@@ -1,6 +1,6 @@
 <?php
 // Load config
-require_once($_SERVER["DOCUMENT_ROOT"] . "/../config/config.php");
+require_once($_SERVER["DOCUMENT_ROOT"] . "/../webshare/config.php");
 
 // Get request and exempt admin page
 $request = $_SERVER["REQUEST_URI"];

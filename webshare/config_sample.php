@@ -4,11 +4,15 @@ class config
 {
 	public static function pathStorage()
 	{
-		return $_SERVER["DOCUMENT_ROOT"] . "/../files/"; // Path to file storage, relativ from document root. Important: Trailing slash at the end
+		return $_SERVER["DOCUMENT_ROOT"] . "/../webshare/files/"; // Path to file storage, relativ from document root. Important: Trailing slash at the end
 	}
 	public static function pathAdminPage()
 	{
-		return $_SERVER["DOCUMENT_ROOT"] . "/../config/adminPage_sample.php"; // Path to admin page which offers form to add shares
+		return $_SERVER["DOCUMENT_ROOT"] . "/../webshare/adminPage_sample.php"; // Path to admin page which offers form to add shares
+	}
+	public static function path404Page()
+	{
+		return $_SERVER["DOCUMENT_ROOT"] . "/../webshare/404Page_sample.php";
 	}
 	public static function dbHost()
 	{

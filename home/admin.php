@@ -1,6 +1,6 @@
 <?php
 // Load config
-require_once($_SERVER["DOCUMENT_ROOT"] . "/../config/config.php");
+require_once($_SERVER["DOCUMENT_ROOT"] . "/../webshare/config.php");
 include(config::pathAdminPage());
 
 if (!empty($_POST["submit"])) {
