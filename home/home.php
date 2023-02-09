@@ -12,11 +12,6 @@ if (str_starts_with($request, "admin")) {
 	require("admin.php");
 	exit;
 }
-if (str_starts_with($request, "addShare.php")) {
-	header("Content-Type: text/html");
-	require("addShare.php");
-	exit;
-}
 
 // Lookup request in database and redirect to link or file
 $getShare = mysqli_prepare($db, "SELECT * FROM " . config::dbTableWebshare() . " WHERE uri=? LIMIT 1");
@@ -25,7 +20,7 @@ mysqli_stmt_execute($getShare);
 $share = mysqli_fetch_assoc(mysqli_stmt_get_result($getShare));
 if (isset($share["expireDate"]) && strtotime($share["expireDate"]) < time()) {
 	if (isset($share["fileName"])) {
-		unlink($pathStorage . $share["uri"]);
+		unlink(config::pathStorage() . $share["uri"]);
 	}
 	$deleteShare = mysqli_prepare($db, "DELETE FROM " . config::dbTableWebshare() . " WHERE uri=?");
 	mysqli_stmt_bind_param($deleteShare, "s", $share["uri"]);
@@ -37,7 +32,7 @@ if (isset($share["link"])) {
 	exit;
 }
 if (isset($share["fileName"])) {
-	$file = $pathStorage . $share["uri"];
+	$file = config::pathStorage() . $share["uri"];
 	if (!file_exists($file)) {
 		error404();
 	}
