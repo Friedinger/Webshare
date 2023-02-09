@@ -1,52 +1,98 @@
 <?php
-// Load config and connect to database
+// Load config
 require_once($_SERVER["DOCUMENT_ROOT"] . "/../config/config.php");
-$db = mysqli_connect(config::dbHost(), config::dbUsername(), config::dbPassword(), config::dbName());
-if (!$db) die("Database connection failed.");
 
 // Get request and exempt admin page
-$request = mysqli_real_escape_string($db, $_SERVER["REQUEST_URI"]);
-$request = substr($request, 1);
-if (str_starts_with($request, "admin")) {
+$request = $_SERVER["REQUEST_URI"];
+if (str_starts_with($request, "/admin")) {
 	header("Content-Type: text/html");
 	require("admin.php");
 	exit;
 }
 
-// Lookup request in database and redirect to link or file
-$getShare = mysqli_prepare($db, "SELECT * FROM " . config::dbTableWebshare() . " WHERE uri=? LIMIT 1");
-mysqli_stmt_bind_param($getShare, "s", $request);
-mysqli_stmt_execute($getShare);
-$share = mysqli_fetch_assoc(mysqli_stmt_get_result($getShare));
-if (isset($share["expireDate"]) && strtotime($share["expireDate"]) < time()) {
-	if (isset($share["fileName"])) {
-		unlink(config::pathStorage() . $share["uri"]);
-	}
-	$deleteShare = mysqli_prepare($db, "DELETE FROM " . config::dbTableWebshare() . " WHERE uri=?");
-	mysqli_stmt_bind_param($deleteShare, "s", $share["uri"]);
-	mysqli_stmt_execute($deleteShare);
-	error404();
-}
+$share = getShare($_SERVER["REQUEST_URI"]);
 if (isset($share["link"])) {
+	redirectLink($share);
+}
+if (isset($share["fileName"])) {
+	if (isset($_GET["action"])) {
+		redirectFile($share);
+	}
+	viewPage($share);
+}
+error404();
+
+function getShare($request)
+{
+	// Connect to database
+	$db = mysqli_connect(config::dbHost(), config::dbUsername(), config::dbPassword(), config::dbName());
+	if (!$db) die("Database connection failed.");
+	// Lookup request in database and redirect to link or file
+	$request = mysqli_real_escape_string($db, $request);
+	$request = substr($request, 1);
+	$request = explode("?", $request)[0];
+	$getShare = mysqli_prepare($db, "SELECT * FROM " . config::dbTableWebshare() . " WHERE uri=? LIMIT 1");
+	mysqli_stmt_bind_param($getShare, "s", $request);
+	mysqli_stmt_execute($getShare);
+	$share = mysqli_fetch_assoc(mysqli_stmt_get_result($getShare));
+	if (isset($share["expireDate"]) && strtotime($share["expireDate"]) < time()) {
+		if (isset($share["fileName"])) {
+			unlink(config::pathStorage() . $share["uri"]);
+		}
+		$deleteShare = mysqli_prepare($db, "DELETE FROM " . config::dbTableWebshare() . " WHERE uri=?");
+		mysqli_stmt_bind_param($deleteShare, "s", $share["uri"]);
+		mysqli_stmt_execute($deleteShare);
+		error404();
+	}
+	return $share;
+}
+
+function redirectLink($share)
+{
 	header("Location:" . $share["link"]);
 	exit;
 }
-if (isset($share["fileName"])) {
-	$file = config::pathStorage() . $share["uri"];
-	if (!file_exists($file)) {
-		error404();
+
+function redirectFile($share)
+{
+	if ($_GET["action"] == "show") {
+		$file = config::pathStorage() . $share["uri"];
+		if (!file_exists($file)) {
+			error404();
+		}
+		header("Content-Disposition: inline; filename=" . $share["fileName"]);
+		header("Content-Type: " . $share["fileMime"]);
+		readfile($file);
+		exit;
+	} else if ($_GET["action"] == "download") {
+		$file = config::pathStorage() . $share["uri"];
+		if (!file_exists($file)) {
+			error404();
+		}
+		header("Content-Disposition: attachment; filename=" . $share["fileName"]);
+		header("Content-Type: " . $share["fileMime"]);
+		readfile($file);
+		exit;
 	}
-	header("Content-Disposition: attachment; filename=" . $share["fileName"]);
-	header("Content-Type: " . $share["fileMime"]);
-	require($file);
-	exit;
+	error404();
 }
-error404();
+
+function viewPage($share)
+{
+?>
+	<style>
+		html {
+			background-color: #000000;
+		}
+	</style>
+	<iframe src="<?php print($_SERVER["REQUEST_URI"]) ?>?action=show" style="width: 100%;height: 97vh;"></iframe>
+<?php }
 
 // Throw error if request is not found
 function error404()
 {
 	header("HTTP/1.0 404 Not Found");
-	echo "Error 404";
+	header("Content-Type: text/html");
+	require(config::path404Page());
 	exit;
 }

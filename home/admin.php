@@ -63,6 +63,7 @@ function getMime($file)
 		"png" => "image/png",
 		"jpg" => "image/jpeg",
 		"jpeg" => "image/jpeg",
+		"pdf" => "application/pdf",
 	);
 	$extension = pathinfo($file, PATHINFO_EXTENSION); // Get file extension
 	$mime = $mimeTypes[$extension] ?? "text/plain"; // Chose mime type depending on file extension, default value "text/plain"
