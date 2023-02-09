@@ -24,13 +24,19 @@ mysqli_stmt_bind_param($getShare, "s", $request);
 mysqli_stmt_execute($getShare);
 $share = mysqli_fetch_assoc(mysqli_stmt_get_result($getShare));
 if (isset($share["expireDate"]) && strtotime($share["expireDate"]) < time()) {
+	if (isset($share["fileName"])) {
+		unlink($pathStorage . $share["uri"]);
+	}
+	$deleteShare = mysqli_prepare($db, "DELETE FROM " . config::dbTableWebshare() . " WHERE uri=?");
+	mysqli_stmt_bind_param($deleteShare, "s", $share["uri"]);
+	mysqli_stmt_execute($deleteShare);
 	error404();
 }
 if (isset($share["link"])) {
 	header("Location:" . $share["link"]);
 	exit;
 }
-if (isset($share["fileName"]) && isset($share["fileName"])) {
+if (isset($share["fileName"])) {
 	$file = $pathStorage . $share["uri"];
 	if (!file_exists($file)) {
 		error404();
