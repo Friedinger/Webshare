@@ -62,6 +62,7 @@ function redirectFile($share)
 		}
 		header("Content-Disposition: inline; filename=" . $share["fileName"]);
 		header("Content-Type: " . $share["fileMime"]);
+		header("Content-Length: " . filesize($file));
 		readfile($file);
 		exit;
 	} else if ($_GET["action"] == "download") {
@@ -71,6 +72,7 @@ function redirectFile($share)
 		}
 		header("Content-Disposition: attachment; filename=" . $share["fileName"]);
 		header("Content-Type: " . $share["fileMime"]);
+		header("Content-Length: " . filesize($file));
 		readfile($file);
 		exit;
 	}
@@ -79,14 +81,9 @@ function redirectFile($share)
 
 function viewPage($share)
 {
-?>
-	<style>
-		html {
-			background-color: #000000;
-		}
-	</style>
-	<iframe src="<?php print($_SERVER["REQUEST_URI"]) ?>?action=show" style="width: 100%;height: 97vh;"></iframe>
-<?php }
+	require(config::pathViewPage());
+	exit;
+}
 
 // Throw error if request is not found
 function error404()
