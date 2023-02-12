@@ -1,53 +1,53 @@
 <?php
 // Load config
 require_once($_SERVER["DOCUMENT_ROOT"] . "/../webshare/config.php");
-include(config::pathAdminPage());
+include(webshareConfig::pathAdminPage());
 
-if (!config::adminPageProtection()) {
+if (!webshareConfig::adminPageProtection()) {
 	header("Location: /");
 	exit;
 }
 
-if (!empty($_POST["submit"]) && config::adminPageProtection()) {
+if (!empty($_POST["submit"]) && webshareConfig::adminPageProtection()) {
 	print(addShare());
 }
 
 // Add a new share
 function addShare()
 {
-	$db = mysqli_connect(config::dbHost(), config::dbUsername(), config::dbPassword(), config::dbName());
+	$db = mysqli_connect(webshareConfig::dbHost(), webshareConfig::dbUsername(), webshareConfig::dbPassword(), webshareConfig::dbName());
 	if (!$db) die("Database connection failed."); // Database connection error
 	$uri = mysqli_real_escape_string($db, $_POST["uri"]);
 	$expireDate = mysqli_real_escape_string($db, $_POST["expireDate"]);
 	if (empty($expireDate)) $expireDate = null;
-	if ($_FILES["file"]["name"] && !empty($_POST["link"])) return config::addingMessages("errorBoth");
+	if ($_FILES["file"]["name"] && !empty($_POST["link"])) return webshareConfig::addingMessages("errorBoth");
 	// Add file
 	if ($_FILES["file"]["name"]) {
 		switch ($_FILES["file"]["error"]) {
 			case 0:
 				$fileName = mysqli_real_escape_string($db, $_FILES["file"]["name"]);
 				$fileMime = getMime(mysqli_real_escape_string($db, $fileName));
-				$addShare = mysqli_prepare($db, "INSERT IGNORE INTO " . config::dbTableWebshare() . " (uri, fileName, fileMime, expireDate) VALUES (?, ?, ?, ?)");
+				$addShare = mysqli_prepare($db, "INSERT IGNORE INTO " . webshareConfig::dbTableWebshare() . " (uri, fileName, fileMime, expireDate) VALUES (?, ?, ?, ?)");
 				mysqli_stmt_bind_param($addShare, "ssss", $uri, $fileName, $fileMime, $expireDate);
 				mysqli_stmt_execute($addShare);
 				if (mysqli_stmt_affected_rows($addShare)) {
-					move_uploaded_file($_FILES["file"]["tmp_name"], config::pathStorage() . $uri);
+					move_uploaded_file($_FILES["file"]["tmp_name"], webshareConfig::pathStorage() . $uri);
 					mysqli_close($db);
-					return config::addingMessages("success") . "<a href='" . $uri . "'>" . $_SERVER["HTTP_HOST"] . $_SERVER["REQUEST_URI"] . $uri . "</a>";
+					return webshareConfig::addingMessages("success") . "<a href='" . $uri . "'>" . $_SERVER["HTTP_HOST"] . $_SERVER["REQUEST_URI"] . $uri . "</a>";
 				}
 				mysqli_close($db);
-				return config::addingMessages("errorUri");
+				return webshareConfig::addingMessages("errorUri");
 			case 1:
-				return config::addingMessages("errorUploadSize");
+				return webshareConfig::addingMessages("errorUploadSize");
 			default:
-				return config::addingMessages("error");
+				return webshareConfig::addingMessages("error");
 		}
 	}
 	// Add link
 	if (!empty($_POST["link"])) {
 		$link = mysqli_real_escape_string($db, $_POST["link"]);
 		if (!preg_match("/^https?:\/\//", $link)) $link = "https://" . $link;
-		$addShare = mysqli_prepare($db, "INSERT IGNORE INTO " . config::dbTableWebshare() . " (uri, link, expireDate) VALUES (?, ?, ?)");
+		$addShare = mysqli_prepare($db, "INSERT IGNORE INTO " . webshareConfig::dbTableWebshare() . " (uri, link, expireDate) VALUES (?, ?, ?)");
 		mysqli_stmt_bind_param($addShare, "sss", $uri, $link, $expireDate);
 		mysqli_stmt_execute($addShare);
 		if (mysqli_stmt_affected_rows($addShare)) {
@@ -59,14 +59,14 @@ function addShare()
 					<div class='copy-icon'>
 				</div></a>
 			";
-			$hi = config::addingMessages("success") . " <a href='" . $uri . "'>" . $shareLink . "</a> " . $copyShareLink;
+			$hi = webshareConfig::addingMessages("success") . " <a href='" . $uri . "'>" . $shareLink . "</a> " . $copyShareLink;
 			return $hi;
 		}
 		mysqli_close($db);
-		return config::addingMessages("errorUri");
+		return webshareConfig::addingMessages("errorUri");
 	}
 	mysqli_close($db);
-	return config::addingMessages("error");
+	return webshareConfig::addingMessages("error");
 }
 
 // Get mime type of file
