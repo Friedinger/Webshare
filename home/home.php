@@ -5,9 +5,12 @@ require_once($_SERVER["DOCUMENT_ROOT"] . "/../webshare/config.php");
 // Get request and exempt admin page
 $request = str_replace(dirname($_SERVER["PHP_SELF"]), "", $_SERVER["REQUEST_URI"]);
 if (str_starts_with($request, "/admin")) {
-	header("Content-Type: text/html");
-	require("admin.php");
-	exit;
+	if (config::adminPageProtection()) {
+		header("Content-Type: text/html");
+		require("admin.php");
+		exit;
+	}
+	error404();
 }
 
 $share = getShare($request);

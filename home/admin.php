@@ -3,7 +3,12 @@
 require_once($_SERVER["DOCUMENT_ROOT"] . "/../webshare/config.php");
 include(config::pathAdminPage());
 
-if (!empty($_POST["submit"])) {
+if (!config::adminPageProtection()) {
+	header("Location: /");
+	exit;
+}
+
+if (!empty($_POST["submit"]) && config::adminPageProtection()) {
 	print(addShare());
 }
 

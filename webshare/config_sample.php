@@ -49,4 +49,8 @@ class config
 		];
 		return $messages[$message];
 	}
+	public static function adminPageProtection()
+	{
+		return true; // Control authentication to protect admin page, return true if authenticated
+	}
 }
