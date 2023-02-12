@@ -4,7 +4,7 @@ require_once($_SERVER["DOCUMENT_ROOT"] . "/../webshare/config.php");
 include(config::pathAdminPage());
 
 if (!empty($_POST["submit"])) {
-	echo addShare();
+	print(addShare());
 }
 
 // Add a new share
@@ -47,7 +47,15 @@ function addShare()
 		mysqli_stmt_execute($addShare);
 		if (mysqli_stmt_affected_rows($addShare)) {
 			mysqli_close($db);
-			return config::addingMessages("success") . "<a href='" . $uri . "'>" . $_SERVER["HTTP_HOST"] . $uri . "</a>";
+			$shareLink =  "https://" . $_SERVER["HTTP_HOST"] . dirname($_SERVER["PHP_SELF"]) . "/" . $uri;
+			$shareLink = str_replace("\\", "", $shareLink);
+			$copyShareLink = "
+				<a href='javascript:void(0);' onclick='navigator.clipboard.writeText(`" . $shareLink . "`);'>
+					<div class='copy-icon'>
+				</div></a>
+			";
+			$hi = config::addingMessages("success") . " <a href='" . $uri . "'>" . $shareLink . "</a> " . $copyShareLink;
+			return $hi;
 		}
 		mysqli_close($db);
 		return config::addingMessages("errorUri");

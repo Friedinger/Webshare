@@ -3,14 +3,14 @@
 require_once($_SERVER["DOCUMENT_ROOT"] . "/../webshare/config.php");
 
 // Get request and exempt admin page
-$request = $_SERVER["REQUEST_URI"];
+$request = str_replace(dirname($_SERVER["PHP_SELF"]), "", $_SERVER["REQUEST_URI"]);
 if (str_starts_with($request, "/admin")) {
 	header("Content-Type: text/html");
 	require("admin.php");
 	exit;
 }
 
-$share = getShare($_SERVER["REQUEST_URI"]);
+$share = getShare($request);
 if (isset($share["link"])) {
 	redirectLink($share);
 }

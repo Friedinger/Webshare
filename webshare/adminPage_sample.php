@@ -9,16 +9,23 @@
 			color: hsl(0, 0%, 100%);
 			background-color: hsl(0, 0%, 0%);
 			font-family: Verdana, sans-serif;
-			display: flex;
-			flex-direction: column;
-			min-height: calc(100% - 1rem);
 			padding: 0.5rem;
 			margin: 0;
 			color-scheme: dark;
 		}
 
+		a {
+			color: inherit;
+			background-color: inherit;
+			text-decoration: none;
+		}
+
+		a:hover {
+			text-decoration: underline;
+		}
+
 		form {
-			margin-top: 1rem;
+			margin: 1rem 0;
 		}
 
 		form label {
@@ -61,6 +68,41 @@
 		form input[type="submit"]:hover {
 			background-color: hsl(0, 0%, 27%);
 			cursor: pointer;
+		}
+
+		.copy-icon {
+			box-sizing: border-box;
+			position: relative;
+			display: inline-block;
+			width: 16px;
+			height: 16px;
+			background-color: inherit;
+		}
+
+		.copy-icon::before {
+
+			content: "";
+			display: block;
+			box-sizing: border-box;
+			border: 2px solid;
+			position: absolute;
+			bottom: 0px;
+			right: 0px;
+			width: 12px;
+			height: 16px;
+		}
+
+		.copy-icon::after {
+			content: "";
+			display: block;
+			box-sizing: border-box;
+			border: 2px solid;
+			position: absolute;
+			bottom: -4px;
+			right: 4px;
+			width: 12px;
+			height: 16px;
+			background-color: inherit;
 		}
 	</style>
 </head>

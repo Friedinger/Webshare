@@ -24,7 +24,6 @@
 		header {
 			order: 1;
 			background-color: hsl(0, 0%, 20%);
-			/* padding: inherit; */
 			margin-bottom: 0.5rem;
 		}
 
@@ -33,9 +32,10 @@
 			padding: 0.5rem;
 		}
 
-		header .download {
+		header a {
 			float: right;
 			color: inherit;
+			background-color: inherit;
 			text-decoration: none;
 			padding: 0.5rem;
 		}
@@ -44,7 +44,42 @@
 			background-color: hsl(0, 0%, 27%);
 		}
 
-		header .download .download-icon {
+		header .copy-icon {
+			box-sizing: border-box;
+			position: relative;
+			display: inline-block;
+			width: 16px;
+			height: 16px;
+			background-color: inherit;
+		}
+
+		header .copy-icon::before {
+
+			content: "";
+			display: block;
+			box-sizing: border-box;
+			border: 2px solid;
+			position: absolute;
+			bottom: 0px;
+			right: 0px;
+			width: 12px;
+			height: 16px;
+		}
+
+		header .copy-icon::after {
+			content: "";
+			display: block;
+			box-sizing: border-box;
+			border: 2px solid;
+			position: absolute;
+			bottom: -4px;
+			right: 4px;
+			width: 12px;
+			height: 16px;
+			background-color: inherit;
+		}
+
+		header .download-icon {
 			box-sizing: border-box;
 			position: relative;
 			display: inline-block;
@@ -55,7 +90,7 @@
 			bottom: -2px;
 		}
 
-		header .download .download-icon::after {
+		header .download-icon::after {
 			content: "";
 			box-sizing: inherit;
 			position: absolute;
@@ -68,7 +103,7 @@
 			bottom: 4px;
 		}
 
-		header .download .download-icon::before {
+		header .download-icon::before {
 			content: "";
 			box-sizing: inherit;
 			position: absolute;
@@ -87,14 +122,30 @@
 			border: none;
 		}
 	</style>
+	<script>
+		function copyLink() {
+			navigator.clipboard.writeText("<?php print("https://" . $_SERVER["HTTP_HOST"] . dirname($_SERVER["PHP_SELF"]) . "/" . $share["uri"]) ?>");
+			document.getElementById("copyLink").innerHTML = "Link copied";
+		}
+
+		function resetCopyLink() {
+			setTimeout(function() {
+				document.getElementById("copyLink").innerHTML = "Copy Link";
+			}, 1000)
+		}
+	</script>
 </head>
 
 <body>
 	<header>
 		<div class="fileName"><?php print($share["fileName"]) ?></div>
-		<a class="download" href="<?php print($share["uri"]) ?>?action=download">
+		<a href="<?php print($share["uri"]) ?>?action=download">
 			<div class="download-icon"></div>
 			Download
+		</a>
+		<a href="javascript:void(0);" onclick="copyLink();" onmouseout="resetCopyLink();">
+			<div class="copy-icon"></div>
+			<span id="copyLink">Copy Link</span>
 		</a>
 	</header>
 	<iframe src="<?php print($share["uri"]) ?>?action=show"></iframe>
