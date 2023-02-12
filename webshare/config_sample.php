@@ -10,9 +10,13 @@ class config
 	{
 		return $_SERVER["DOCUMENT_ROOT"] . "/../webshare/adminPage_sample.php"; // Path to admin page which offers form to add shares
 	}
+	public static function pathViewPage()
+	{
+		return $_SERVER["DOCUMENT_ROOT"] . "/../webshare/viewPage_sample.php"; // Path to view page which displays a preview of requested file
+	}
 	public static function path404Page()
 	{
-		return $_SERVER["DOCUMENT_ROOT"] . "/../webshare/404Page_sample.php";
+		return $_SERVER["DOCUMENT_ROOT"] . "/../webshare/404Page_sample.php"; // Path to page for error 404
 	}
 	public static function dbHost()
 	{
@@ -37,8 +41,10 @@ class config
 	public static function addingMessages($message)
 	{
 		$messages = [
-			"success" => "Share added successfully.", // Message if share added successfully
+			"success" => "Share added successfully: ", // Message if share added successfully
+			"errorBoth" => "Share adding failed: File and link offered, please only choose one.", // Message if file and link options were set 
 			"errorUri" => "Share adding failed: URI invalid, please chose a different one.", // Message if chosen URI is invalid
+			"errorUploadSize" => "Share adding failed: File size limit exceeded.", // Message if file size limit is exceeded
 			"error" => "Share adding failed.", // Message at other errors
 		];
 		return $messages[$message];
