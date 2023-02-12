@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 
 <head>
 	<title>Webshare | <?php print($share["fileName"]) ?></title>
@@ -148,7 +148,7 @@
 			<span id="copyLink">Copy Link</span>
 		</a>
 	</header>
-	<iframe src="<?php print($share["uri"]) ?>?action=show"></iframe>
+	<iframe src="<?php print($share["uri"]) ?>?action=show" title="<?php print($share["name"]) ?>"></iframe>
 </body>
 
 </html>

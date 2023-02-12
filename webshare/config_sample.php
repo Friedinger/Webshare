@@ -1,6 +1,6 @@
 <?php
 if (!isset($_SESSION)) session_start();
-class config
+class WebshareConfig
 {
 	public static function pathStorage()
 	{
@@ -42,7 +42,7 @@ class config
 	{
 		$messages = [
 			"success" => "Share added successfully: ", // Message if share added successfully
-			"errorBoth" => "Share adding failed: File and link offered, please only choose one.", // Message if file and link options were set 
+			"errorBoth" => "Share adding failed: File and link offered, please only choose one.", // Message if file and link options were set
 			"errorUri" => "Share adding failed: URI invalid, please chose a different one.", // Message if chosen URI is invalid
 			"errorUploadSize" => "Share adding failed: File size limit exceeded.", // Message if file size limit is exceeded
 			"error" => "Share adding failed.", // Message at other errors
