@@ -7,7 +7,7 @@ $request = str_replace(dirname($_SERVER["PHP_SELF"]), "", $_SERVER["REQUEST_URI"
 if (str_starts_with($request, "/admin")) {
 	if (webshareConfig::adminPageProtection()) {
 		header("Content-Type: text/html");
-		require("admin.php");
+		require("webshareAdmin.php");
 		exit;
 	}
 	error404();
