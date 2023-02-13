@@ -1,16 +1,19 @@
 <?php
 // Load config
 require_once($_SERVER["DOCUMENT_ROOT"] . "/../webshare/webshareConfig.php");
-include(WebshareConfig::pathAdminPage());
+
 
 if (!WebshareConfig::adminPageProtection()) {
 	header("Location: /");
 	exit;
 }
 
+$message = "";
 if (!empty($_POST["submit"]) && WebshareConfig::adminPageProtection()) {
-	print(addShare());
+	$message = addShare();
 }
+
+include(WebshareConfig::pathAdminPage($message));
 
 // Add a new share
 function addShare()

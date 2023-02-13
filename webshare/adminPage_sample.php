@@ -117,6 +117,7 @@
 		<label>Expire Date: </label><input type="datetime-local" name="expireDate" min="<?php echo date('Y-m-d\TH:i'); ?>"><br>
 		<input type="submit" value="Add share" name="submit"><br>
 	</form>
+	<?php print($message) ?>
 </body>
 
 </html>
