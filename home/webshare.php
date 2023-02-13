@@ -8,12 +8,13 @@ $request = str_replace($installPath, "", $_SERVER["REQUEST_URI"]);
 $request = explode("?", $request)[0]; // Remove parameters
 $request = rtrim($request, "/"); // Remove trailing slash
 if (str_starts_with($request, "admin")) {
-	if (WebshareConfig::adminPageProtection()) {
+	if (WebshareConfig::adminPageAccess()) {
 		header("Content-Type: text/html");
 		require("webshareAdmin.php");
 		exit;
 	}
-	error404();
+	WebshareConfig::adminPageAccessFailed();
+	exit;
 }
 
 $share = getShare($request);

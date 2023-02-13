@@ -49,8 +49,12 @@ class WebshareConfig
 		];
 		return $messages[$message];
 	}
-	public static function adminPageProtection()
+	public static function adminPageAccess()
 	{
 		return true; // Control authentication to protect admin page, return true if authenticated
+	}
+	public static function adminPageAccessFailed()
+	{
+		die("<h1>Forbidden</h1>No access to the requested page."); // Action if admin page was requested, but is not allowed
 	}
 }

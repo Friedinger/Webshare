@@ -3,13 +3,13 @@
 require_once($_SERVER["DOCUMENT_ROOT"] . "/../webshare/webshareConfig.php");
 
 
-if (!WebshareConfig::adminPageProtection()) {
-	header("Location: /");
+if (!WebshareConfig::adminPageAccess()) {
+	WebshareConfig::adminPageAccessFailed();
 	exit;
 }
 
 $message = "";
-if (!empty($_POST["submit"]) && WebshareConfig::adminPageProtection()) {
+if (!empty($_POST["submit"]) && WebshareConfig::adminPageAccess()) {
 	$message = addShare();
 }
 
