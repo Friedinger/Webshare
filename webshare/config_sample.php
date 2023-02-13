@@ -10,7 +10,7 @@ class WebshareConfig
 	{
 		return $_SERVER["DOCUMENT_ROOT"] . "/../webshare/adminPage_sample.php"; // Path to admin page which offers form to add shares
 	}
-	public static function pathViewPage()
+	public static function pathViewPage($iframeSrc, $iframeTitle)
 	{
 		return $_SERVER["DOCUMENT_ROOT"] . "/../webshare/viewPage_sample.php"; // Path to view page which displays a preview of requested file
 	}
