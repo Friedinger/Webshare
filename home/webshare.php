@@ -3,7 +3,10 @@
 require_once($_SERVER["DOCUMENT_ROOT"] . "/../webshare/config.php");
 
 // Get request and exempt admin page
-$request = str_replace(dirname($_SERVER["PHP_SELF"]), "", $_SERVER["REQUEST_URI"]);
+$installPath = str_replace("\\", "", dirname($_SERVER["PHP_SELF"]) . "/");
+$request = str_replace($installPath, "", $_SERVER["REQUEST_URI"]);
+$request = explode("?", $request)[0]; // Remove parameters
+$request = rtrim($request, "/"); // Remove trailing slash
 if (str_starts_with($request, "/admin")) {
 	if (WebshareConfig::adminPageProtection()) {
 		header("Content-Type: text/html");
@@ -21,7 +24,7 @@ if (isset($share["fileName"])) {
 	if (isset($_GET["action"])) {
 		redirectFile($share);
 	}
-	viewPage($share);
+	viewPage($share, $installPath);
 }
 error404();
 
@@ -32,8 +35,6 @@ function getShare($request)
 	if (!$db) die("Database connection failed.");
 	// Lookup request in database and redirect to link or file
 	$request = mysqli_real_escape_string($db, $request);
-	$request = substr($request, 1);
-	$request = explode("?", $request)[0];
 	$getShare = mysqli_prepare($db, "SELECT * FROM " . WebshareConfig::dbTableWebshare() . " WHERE uri=? LIMIT 1");
 	mysqli_stmt_bind_param($getShare, "s", $request);
 	mysqli_stmt_execute($getShare);
@@ -82,9 +83,11 @@ function redirectFile($share)
 	error404();
 }
 
-function viewPage($share)
+function viewPage($share, $installPath)
 {
-	require(WebshareConfig::pathViewPage());
+	$iframeSrc = $installPath . $share["uri"];
+	$iframeTitle = $share["fileName"];
+	require(WebshareConfig::pathViewPage($iframeSrc, $iframeTitle));
 	exit;
 }
 

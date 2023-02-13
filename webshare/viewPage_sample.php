@@ -148,7 +148,7 @@
 			<span id="copyLink">Copy Link</span>
 		</a>
 	</header>
-	<iframe src="<?php print($share["uri"]) ?>?action=show" title="<?php print($share["name"]) ?>"></iframe>
+	<iframe src="<?php print($iframeSrc) ?>?action=show" title="<?php print($iframeTitle) ?>"></iframe>
 </body>
 
 </html>
