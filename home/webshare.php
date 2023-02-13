@@ -1,6 +1,6 @@
 <?php
 // Load config
-require_once($_SERVER["DOCUMENT_ROOT"] . "/../webshare/config.php");
+require_once($_SERVER["DOCUMENT_ROOT"] . "/../webshare/webshareConfig.php");
 
 // Get request and exempt admin page
 $installPath = str_replace("\\", "", dirname($_SERVER["PHP_SELF"]) . "/");
