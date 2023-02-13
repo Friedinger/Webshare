@@ -7,7 +7,7 @@ $installPath = str_replace("\\", "", dirname($_SERVER["PHP_SELF"]) . "/");
 $request = str_replace($installPath, "", $_SERVER["REQUEST_URI"]);
 $request = explode("?", $request)[0]; // Remove parameters
 $request = rtrim($request, "/"); // Remove trailing slash
-if (str_starts_with($request, "/admin")) {
+if (str_starts_with($request, "admin")) {
 	if (WebshareConfig::adminPageProtection()) {
 		header("Content-Type: text/html");
 		require("webshareAdmin.php");
