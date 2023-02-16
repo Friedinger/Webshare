@@ -11,7 +11,7 @@ if (!WebshareConfig::adminPageAccess()) {
 $message = "";
 if (!empty($_POST["submit"]) && WebshareConfig::adminPageAccess()) {
 	$message = addShare();
-	mysqli_close($db);
+	if (isset($db)) mysqli_close($db);
 }
 
 include(WebshareConfig::pathAdminPage($message));
@@ -60,14 +60,14 @@ function addShare()
 		mysqli_stmt_bind_param($addShare, "sss", $uri, $link, $expireDate);
 		mysqli_stmt_execute($addShare);
 		if (mysqli_stmt_affected_rows($addShare)) {
-			$shareLink =  "https://" . $_SERVER["HTTP_HOST"] . dirname($_SERVER["PHP_SELF"]) . "/" . $uri;
+			$shareLink =  $_SERVER["HTTP_HOST"] . dirname($_SERVER["PHP_SELF"]) . "/" . $uri;
 			$shareLink = str_replace("\\", "", $shareLink);
 			$copyShareLink = "
-				<a href='javascript:void(0);' onclick='navigator.clipboard.writeText(`" . $shareLink . "`);'>
+				<a href='javascript:void(0);' onclick='navigator.clipboard.writeText(`https://" . $shareLink . "`);'>
 					<div class='copy-icon'>
 				</div></a>
 			";
-			return WebshareConfig::addingMessages("success") . " <a href='" . $uri . "'>" . $shareLink . "</a> " . $copyShareLink;
+			return WebshareConfig::addingMessages("success") . " <a href='//" . $shareLink . "'>https://" . $shareLink . "</a> " . $copyShareLink;
 		}
 		return WebshareConfig::addingMessages("errorUri");
 	}
