@@ -11,6 +11,7 @@ if (!WebshareConfig::adminPageAccess()) {
 $message = "";
 if (!empty($_POST["submit"]) && WebshareConfig::adminPageAccess()) {
 	$message = addShare();
+	mysqli_close($db);
 }
 
 include(WebshareConfig::pathAdminPage($message));
@@ -35,10 +36,15 @@ function addShare()
 				mysqli_stmt_execute($addShare);
 				if (mysqli_stmt_affected_rows($addShare)) {
 					move_uploaded_file($_FILES["file"]["tmp_name"], WebshareConfig::pathStorage() . $uri);
-					mysqli_close($db);
-					return WebshareConfig::addingMessages("success") . "<a href='" . $uri . "'>" . $_SERVER["HTTP_HOST"] . $_SERVER["REQUEST_URI"] . $uri . "</a>";
+					$shareLink =  "https://" . $_SERVER["HTTP_HOST"] . dirname($_SERVER["PHP_SELF"]) . "/" . $uri;
+					$shareLink = str_replace("\\", "", $shareLink);
+					$copyShareLink = "
+						<a href='javascript:void(0);' onclick='navigator.clipboard.writeText(`" . $shareLink . "`);'>
+							<div class='copy-icon'>
+						</div></a>
+					";
+					return WebshareConfig::addingMessages("success") . " <a href='" . $uri . "'>" . $shareLink . "</a> " . $copyShareLink;
 				}
-				mysqli_close($db);
 				return WebshareConfig::addingMessages("errorUri");
 			case 1:
 				return WebshareConfig::addingMessages("errorUploadSize");
@@ -54,7 +60,6 @@ function addShare()
 		mysqli_stmt_bind_param($addShare, "sss", $uri, $link, $expireDate);
 		mysqli_stmt_execute($addShare);
 		if (mysqli_stmt_affected_rows($addShare)) {
-			mysqli_close($db);
 			$shareLink =  "https://" . $_SERVER["HTTP_HOST"] . dirname($_SERVER["PHP_SELF"]) . "/" . $uri;
 			$shareLink = str_replace("\\", "", $shareLink);
 			$copyShareLink = "
@@ -64,10 +69,8 @@ function addShare()
 			";
 			return WebshareConfig::addingMessages("success") . " <a href='" . $uri . "'>" . $shareLink . "</a> " . $copyShareLink;
 		}
-		mysqli_close($db);
 		return WebshareConfig::addingMessages("errorUri");
 	}
-	mysqli_close($db);
 	return WebshareConfig::addingMessages("error");
 }
 
