@@ -14,7 +14,7 @@ Webshare: A simple, lightweight, self hosted webservice to easily share files an
 
 1. Download the files from the repository and upload them to the webserver.
 2. Move the file to the correct location:
-    - The files in the _home_ directory must be **inside** the root directory of the webserver. Thay can be moved into a subdirectory.
+    - The files in the _home_ directory must be inside the **root directory** of the webserver. They can be moved into a subdirectory.
     - The _webshare_ directory must be **in the parent directory** of the root directory of the webserver.
 3. Create MySQL table for Webshare:
 
@@ -31,10 +31,10 @@ Webshare: A simple, lightweight, self hosted webservice to easily share files an
     Make _URI_ a primary key index to ensure unique short links.
 
 4. Adjust config file:
-    - Set path to file Storage.
-    - Set path to admin, view and error 404 page.
-    - Set the database login information (hostname, username, password, database name and table name for Webshare).
-    - Limit access to admin page by validating the login state (recommended) or use an a authentication with htaccess.
+    - Set path to file storage.
+    - Set path to _admin_, _view_ and _error 404_ page.
+    - Set the database login information (_hostname_, _username_, _password_, _database name_ and _table name_ for Webshare).
+    - Limit access to admin page by validating the login state (recommended) or use an authentication with an _.htaccess_ file.
     - Change action if admin page was requested but user is not authenticated.
 
 ## Customization
@@ -61,7 +61,7 @@ The messages displayed after submitting the form can be customized in the Websha
 
 ### View page
 
-The view page must include an iframe to preview the shared file. Therefore the source must be included with PHP.
+The view page must include an iframe to preview the shared file. Therefore, the source must be included with PHP.
 
 ```html
 <iframe
