@@ -2,7 +2,7 @@
 <html lang="en">
 
 <head>
-	<title>Webshare | <?php print($share["fileName"]) ?></title>
+	<title>Webshare | <?php print($iframeTitle) ?></title>
 	<meta name='viewport' content='width=device-width, initial-scale=1.0'>
 	<style>
 		html {
@@ -138,7 +138,7 @@
 
 <body>
 	<header>
-		<div class="fileName"><?php print($share["fileName"]) ?></div>
+		<div class="fileName"><?php print($iframeTitle) ?></div>
 		<a href="<?php print($share["uri"]) ?>?action=download">
 			<div class="download-icon"></div>
 			Download

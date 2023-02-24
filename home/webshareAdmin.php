@@ -30,10 +30,9 @@ function addShare()
 	if ($_FILES["file"]["name"]) {
 		switch ($_FILES["file"]["error"]) {
 			case 0:
-				$fileName = mysqli_real_escape_string($db, $_FILES["file"]["name"]);
-				$fileMime = getMime(mysqli_real_escape_string($db, $fileName));
-				$addShare = mysqli_prepare($db, "INSERT IGNORE INTO " . WebshareConfig::dbTableWebshare() . " (uri, fileName, fileMime, expireDate) VALUES (?, ?, ?, ?)");
-				mysqli_stmt_bind_param($addShare, "ssss", $uri, $fileName, $fileMime, $expireDate);
+				$file = mysqli_real_escape_string($db, $_FILES["file"]["name"]);
+				$addShare = mysqli_prepare($db, "INSERT IGNORE INTO " . WebshareConfig::dbTableWebshare() . " (uri, file, expireDate) VALUES (?, ?, ?)");
+				mysqli_stmt_bind_param($addShare, "sss", $uri, $file, $expireDate);
 				mysqli_stmt_execute($addShare);
 				if (mysqli_stmt_affected_rows($addShare)) {
 					move_uploaded_file($_FILES["file"]["tmp_name"], WebshareConfig::pathStorage() . $uri);
@@ -75,27 +74,6 @@ function addShare()
 	return WebshareConfig::addingMessages("error");
 }
 
-// Get mime type of file
-function getMime($file)
-{
-	$mimeTypes = array(
-		// List of mime types depending on file extension
-		"php" => "text/html",
-		"html" => "text/html",
-		"css" => "text/css",
-		"scss" => "text/css",
-		"js" => "application/x-javascript",
-		"vbs" => "application/x-vbs",
-		"ico" => "image/x-icon",
-		"png" => "image/png",
-		"jpg" => "image/jpeg",
-		"jpeg" => "image/jpeg",
-		"pdf" => "application/pdf",
-	);
-	$extension = pathinfo($file, PATHINFO_EXTENSION); // Get file extension
-	return $mimeTypes[$extension] ?? "text/plain"; // Chose mime type depending on file extension, default value "text/plain"
-}
-
 // List shares in table
 function listShares()
 {
@@ -104,7 +82,7 @@ function listShares()
 	$listShares = mysqli_prepare($db, "SELECT * FROM " . WebshareConfig::dbTableWebshare());
 	mysqli_stmt_execute($listShares);
 	$shareList = mysqli_fetch_all(mysqli_stmt_get_result($listShares), MYSQLI_ASSOC);
-	print("<table><th>uri</th><th>fileName</th><th>fileMime</th><th>link</th><th>createDate</th><th>expireDate</th><br>");
+	print("<table><th>uri</th><th>file</th><th>link</th><th>createDate</th><th>expireDate</th><br>");
 	foreach ($shareList as $shareContent) {
 		print("<tr>");
 		foreach ($shareContent as $shareValue) {

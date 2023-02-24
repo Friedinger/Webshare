@@ -21,7 +21,7 @@ $share = getShare($request);
 if (isset($share["link"])) {
 	redirectLink($share);
 }
-if (isset($share["fileName"])) {
+if (isset($share["file"])) {
 	if (isset($_GET["action"])) {
 		redirectFile($share);
 	}
@@ -41,7 +41,7 @@ function getShare($request)
 	mysqli_stmt_execute($getShare);
 	$share = mysqli_fetch_assoc(mysqli_stmt_get_result($getShare));
 	if (isset($share["expireDate"]) && strtotime($share["expireDate"]) < time()) {
-		if (isset($share["fileName"])) {
+		if (isset($share["file"])) {
 			unlink(WebshareConfig::pathStorage() . $share["uri"]);
 		}
 		$deleteShare = mysqli_prepare($db, "DELETE FROM " . WebshareConfig::dbTableWebshare() . " WHERE uri=?");
@@ -65,8 +65,8 @@ function redirectFile($share)
 		if (!file_exists($file)) {
 			error404();
 		}
-		header("Content-Disposition: inline; filename=" . $share["fileName"]);
-		header("Content-Type: " . $share["fileMime"]);
+		header("Content-Disposition: inline; filename=" . $share["file"]);
+		header("Content-Type: " . getMime($share["file"]));
 		header("Content-Length: " . filesize($file));
 		readfile($file);
 		exit;
@@ -75,8 +75,8 @@ function redirectFile($share)
 		if (!file_exists($file)) {
 			error404();
 		}
-		header("Content-Disposition: attachment; filename=" . $share["fileName"]);
-		header("Content-Type: " . $share["fileMime"]);
+		header("Content-Disposition: attachment; filename=" . $share["file"]);
+		header("Content-Type: " . getMime($share["file"]));
 		header("Content-Length: " . filesize($file));
 		readfile($file);
 		exit;
@@ -87,7 +87,7 @@ function redirectFile($share)
 function viewPage($share, $installPath)
 {
 	$iframeSrc = $installPath . $share["uri"];
-	$iframeTitle = $share["fileName"];
+	$iframeTitle = $share["file"];
 	require(WebshareConfig::pathViewPage($iframeSrc, $iframeTitle));
 	exit;
 }
@@ -99,4 +99,25 @@ function error404()
 	header("Content-Type: text/html");
 	require(WebshareConfig::path404Page());
 	exit;
+}
+
+// Get mime type of file
+function getMime($file)
+{
+	$mimeTypes = array(
+		// List of mime types depending on file extension
+		"php" => "text/html",
+		"html" => "text/html",
+		"css" => "text/css",
+		"scss" => "text/css",
+		"js" => "application/x-javascript",
+		"vbs" => "application/x-vbs",
+		"ico" => "image/x-icon",
+		"png" => "image/png",
+		"jpg" => "image/jpeg",
+		"jpeg" => "image/jpeg",
+		"pdf" => "application/pdf",
+	);
+	$extension = pathinfo($file, PATHINFO_EXTENSION); // Get file extension
+	return $mimeTypes[$extension] ?? "text/plain"; // Chose mime type depending on file extension, default value "text/plain"
 }
