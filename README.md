@@ -9,6 +9,7 @@ Webshare: A simple, lightweight, self hosted webservice to easily share files an
 -   Set expiration dates for shares (deleted on first attempt post expiration)
 -   Store files in a custom directory on the webserver
 -   Store share data in a MySQL database
+-   Show existing shares in admin page
 
 ## Installation
 
@@ -28,7 +29,7 @@ Webshare: A simple, lightweight, self hosted webservice to easily share files an
     | createDate | timestamp | no | current_timestamp() |
     | expireDate | timestamp | yes | NULL |
 
-    Make _URI_ a primary key index to ensure unique short links.
+    Make _uri_ a primary key index to ensure unique short links.
 
 4. Adjust config file:
     - Set path to file storage.

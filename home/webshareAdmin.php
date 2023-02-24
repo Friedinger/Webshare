@@ -15,6 +15,7 @@ if (!empty($_POST["submit"]) && WebshareConfig::adminPageAccess()) {
 }
 
 include(WebshareConfig::pathAdminPage($message));
+listShares();
 
 // Add a new share
 function addShare()
@@ -93,4 +94,23 @@ function getMime($file)
 	);
 	$extension = pathinfo($file, PATHINFO_EXTENSION); // Get file extension
 	return $mimeTypes[$extension] ?? "text/plain"; // Chose mime type depending on file extension, default value "text/plain"
+}
+
+// List shares in table
+function listShares()
+{
+	$db = mysqli_connect(WebshareConfig::dbHost(), WebshareConfig::dbUsername(), WebshareConfig::dbPassword(), WebshareConfig::dbName());
+	if (!$db) die("Database connection failed."); // Database connection error
+	$listShares = mysqli_prepare($db, "SELECT * FROM " . WebshareConfig::dbTableWebshare());
+	mysqli_stmt_execute($listShares);
+	$shareList = mysqli_fetch_all(mysqli_stmt_get_result($listShares), MYSQLI_ASSOC);
+	print("<table><th>uri</th><th>fileName</th><th>fileMime</th><th>link</th><th>createDate</th><th>expireDate</th><br>");
+	foreach ($shareList as $shareContent) {
+		print("<tr>");
+		foreach ($shareContent as $shareValue) {
+			print("<td>" . $shareValue . "</td>");
+		}
+		print("</tr>");
+	}
+	print("</table>");
 }
