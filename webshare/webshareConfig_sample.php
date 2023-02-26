@@ -14,6 +14,10 @@ class WebshareConfig
 	{
 		return $_SERVER["DOCUMENT_ROOT"] . "/../webshare/viewPage_sample.php"; // Path to view page which displays a preview of requested file
 	}
+	public static function pathPasswordPage($message)
+	{
+		return $_SERVER["DOCUMENT_ROOT"] . "/../webshare/passwordPage_sample.php"; // Path to password page for protected shares
+	}
 	public static function path404Page()
 	{
 		return $_SERVER["DOCUMENT_ROOT"] . "/../webshare/404Page_sample.php"; // Path to page for error 404
@@ -46,6 +50,14 @@ class WebshareConfig
 			"errorUri" => "Share adding failed: URI invalid, please chose a different one.", // Message if chosen URI is invalid
 			"errorUploadSize" => "Share adding failed: File size limit exceeded.", // Message if file size limit is exceeded
 			"error" => "Share adding failed.", // Message at other errors
+		];
+		return $messages[$message];
+	}
+	public static function passwordMessages($message)
+	{
+		$messages = [
+			"standard" => "Please enter the password to access the share.", // Message if password protected share is requested
+			"incorrect" => "The entered password is incorrect. Please try again.", // Message if entered password is incorrect
 		];
 		return $messages[$message];
 	}

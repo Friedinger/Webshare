@@ -18,6 +18,9 @@ if (str_starts_with($request, "admin")) {
 }
 
 $share = getShare($request);
+if (isset($share["password"])) {
+	passwordProtection($share);
+}
 if (isset($share["link"])) {
 	redirectLink($share);
 }
@@ -82,6 +85,21 @@ function redirectFile($share)
 		exit;
 	}
 	error404();
+}
+
+function passwordProtection($share)
+{
+	if (isset($_POST["password"])) {
+		if (password_verify($_POST["password"], $share["password"])) {
+			return;
+		}
+		$message = WebshareConfig::passwordMessages("incorrect");
+		require(WebshareConfig::pathPasswordPage($message));
+		exit;
+	}
+	$message = WebshareConfig::passwordMessages("standard");
+	require(WebshareConfig::pathPasswordPage($message));
+	exit;
 }
 
 function viewPage($share, $installPath)

@@ -62,7 +62,6 @@
 
 		form input[type="datetime-local"]::-webkit-calendar-picker-indicator {
 			color: hsl(0deg, 0%, 100%);
-			;
 		}
 
 		form input[type="submit"]:hover {
@@ -115,6 +114,7 @@
 		<label>File: </label><input type="file" name="file"><br>
 		<label>Link: </label><input type="url" name="link"><br>
 		<label>Expire Date: </label><input type="datetime-local" name="expireDate" min="<?php echo date('Y-m-d\TH:i'); ?>"><br>
+		<label>Password: </label><input type="text" name="password"><br>
 		<input type="submit" value="Add share" name="submit"><br>
 	</form>
 	<?php print($message) ?>

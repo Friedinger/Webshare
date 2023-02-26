@@ -23,11 +23,11 @@ Webshare: A simple, lightweight, self hosted webservice to easily share files an
     | name | type | null | default |
     | ---- | ---- | ---- | ---- |
     | uri | varchar(255) | no | none |
-    | fileName | varchar(255) | yes | NULL |
-    | fileMime | varchar(255) | yes | NULL |
+    | file | varchar(255) | yes | NULL |
     | link | varchar(255) | yes | NULL |
-    | createDate | timestamp | no | current_timestamp() |
+    | password | varchar(255) | yes | NULL |
     | expireDate | timestamp | yes | NULL |
+    | createDate | timestamp | no | current_timestamp() |
 
     Make _uri_ a primary key index to ensure unique short links.
 
@@ -51,9 +51,16 @@ The admin page must offer a form to add a share which consists of the following 
 	<input type="text" name="uri" required /><br />
 	<input type="file" name="file" /><br />
 	<input type="url" name="link" /><br />
+	<label>Password: </label><input type="text" name="password" /><br />
 	<input type="datetime-local" name="expireDate" /><br />
 	<input type="submit" name="submit" /><br />
 </form>
+```
+
+The following PHP code should also be included to display messages after attempting to add the share.
+
+```php
+<?php print($message) ?>
 ```
 
 A sample admin page can be found [here](/webshare/adminPage_sample.php).
@@ -78,6 +85,25 @@ A sample view page can be found [here](/webshare/viewPage_sample.php).
 The error 404 page has no required parts but it should inform the user that an error 404 occurred.
 
 A sample error 404 page can be found [here](/webshare/404Page_sample.php).
+
+### Password page
+
+The password page must contain a form to enter the password to access the protected share.
+
+```html
+<form method="post">
+	<label>Password: </label><input type="password" name="password" /><br />
+	<input type="submit" value="Submit password" name="submit" /><br />
+</form>
+```
+
+Furthermore, the following PHP code should be included to display messages, for example if the entered password is incorrect.
+
+```php
+<?php print($message) ?>
+```
+
+A sample password page can be found [here](/webshare/passwordPage_sample.php).
 
 ## Credit and License
 
