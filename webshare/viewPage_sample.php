@@ -121,6 +121,16 @@
 			height: 100%;
 			border: none;
 		}
+
+		@media only screen and (max-width: 600px) {
+
+			header a,
+			header .fileName {
+				display: inline;
+				float: left;
+				;
+			}
+		}
 	</style>
 	<script>
 		function copyLink() {

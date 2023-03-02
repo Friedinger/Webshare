@@ -4,7 +4,8 @@ require_once($_SERVER["DOCUMENT_ROOT"] . "/../webshare/webshareConfig.php");
 
 // Get request and exempt admin page
 $installPath = str_replace("\\", "", dirname($_SERVER["PHP_SELF"]) . "/");
-$request = str_replace($installPath, "", $_SERVER["REQUEST_URI"]);
+$request = htmlspecialchars($_SERVER["REQUEST_URI"]); // Remove special chars from request
+$request = str_replace($installPath, "", $request); // Remove install path from request
 $request = explode("?", $request)[0]; // Remove parameters
 $request = rtrim($request, "/"); // Remove trailing slash
 if (str_starts_with($request, "admin")) {
@@ -90,7 +91,7 @@ function redirectFile($share)
 function passwordProtection($share)
 {
 	if (isset($_POST["password"])) {
-		if (password_verify($_POST["password"], $share["password"])) {
+		if (password_verify(htmlspecialchars($_POST["password"]), $share["password"])) {
 			return;
 		}
 		$message = WebshareConfig::passwordMessages("incorrect");

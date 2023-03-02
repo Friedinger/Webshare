@@ -13,18 +13,17 @@ if (!empty($_POST["submit"]) && WebshareConfig::adminPageAccess()) {
 	$message = addShare();
 	if (isset($db)) mysqli_close($db);
 }
-
-include(WebshareConfig::pathAdminPage($message));
-listShares();
+$shareList = listShares();
+include(WebshareConfig::pathAdminPage($message, $shareList));
 
 // Add a new share
 function addShare()
 {
 	$db = mysqli_connect(WebshareConfig::dbHost(), WebshareConfig::dbUsername(), WebshareConfig::dbPassword(), WebshareConfig::dbName());
 	if (!$db) die("Database connection failed."); // Database connection error
-	$uri = mysqli_real_escape_string($db, $_POST["uri"]);
-	$expireDate = mysqli_real_escape_string($db, $_POST["expireDate"]);
-	$password = mysqli_real_escape_string($db, $_POST["password"]);
+	$uri = mysqli_real_escape_string($db, htmlspecialchars($_POST["uri"]));
+	$expireDate = mysqli_real_escape_string($db, htmlspecialchars($_POST["expireDate"]));
+	$password = mysqli_real_escape_string($db, htmlspecialchars($_POST["password"]));
 	$password = password_hash($password, PASSWORD_DEFAULT); // Hash password
 	if (empty($expireDate)) $expireDate = null;
 	if ($_FILES["file"]["name"] && !empty($_POST["link"])) return WebshareConfig::addingMessages("errorBoth");
@@ -83,14 +82,23 @@ function listShares()
 	if (!$db) die("Database connection failed."); // Database connection error
 	$listShares = mysqli_prepare($db, "SELECT * FROM " . WebshareConfig::dbTableWebshare());
 	mysqli_stmt_execute($listShares);
-	$shareList = mysqli_fetch_all(mysqli_stmt_get_result($listShares), MYSQLI_ASSOC);
-	print("<table><th>uri</th><th>file</th><th>link</th><th>password</th><th>expireDate</th><th>createDate</th><br>");
-	foreach ($shareList as $shareContent) {
-		print("<tr>");
-		foreach ($shareContent as $shareValue) {
-			print("<td>" . $shareValue . "</td>");
+	$shares = mysqli_fetch_all(mysqli_stmt_get_result($listShares), MYSQLI_ASSOC);
+	$shareList = "";
+	foreach ($shares as $shareContent) {
+		$sharePassword = "";
+		if (!empty($shareContent["password"])) {
+			$sharePassword = "True";
 		}
-		print("</tr>");
+		$shareList .= "
+		<tr>
+			<td>" . htmlspecialchars($shareContent["uri"]) . "</td>
+			<td>" . htmlspecialchars($shareContent["file"]) . "</td>
+			<td>" . htmlspecialchars($shareContent["link"]) . "</td>
+			<td>" . $sharePassword . "</td>
+			<td>" . htmlspecialchars($shareContent["expireDate"]) . "</td>
+			<td>" . htmlspecialchars($shareContent["createDate"]) . "</td>
+		</tr>
+		";
 	}
-	print("</table>");
+	return $shareList;
 }

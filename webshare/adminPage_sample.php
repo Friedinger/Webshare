@@ -103,6 +103,30 @@
 			height: 16px;
 			background-color: inherit;
 		}
+
+		.shareList {
+			width: 100%;
+			overflow-y: hidden;
+			overflow-x: auto;
+		}
+
+		.shareList table {
+			border-collapse: collapse;
+			table-layout: fixed;
+			width: 100%;
+			white-space: nowrap;
+		}
+
+		.shareList th {
+			background-color: hsl(0, 0%, 20%);
+		}
+
+		.shareList th,
+		.shareList td {
+			border: 2px solid hsl(0, 0%, 20%);
+			padding: 0.1rem 0.5rem;
+			overflow: hidden;
+		}
 	</style>
 </head>
 
@@ -118,6 +142,17 @@
 		<input type="submit" value="Add share" name="submit"><br>
 	</form>
 	<?php print($message) ?>
+	<div class="shareList">
+		<table>
+			<th style="width: 50px;">URI</th>
+			<th style="width: 300px;">File</th>
+			<th style="width: 300px;">Link</th>
+			<th style="width: 90px;">Password</th>
+			<th style="width: 180px;">Expire Date</th>
+			<th style="width: 180px;">Create Date</th>
+			<?php print($shareList) ?>
+		</table>
+	</div>
 </body>
 
 </html>

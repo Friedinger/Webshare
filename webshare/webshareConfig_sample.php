@@ -6,7 +6,7 @@ class WebshareConfig
 	{
 		return $_SERVER["DOCUMENT_ROOT"] . "/../webshare/files/"; // Path to file storage, relativ from document root. Important: Trailing slash at the end
 	}
-	public static function pathAdminPage()
+	public static function pathAdminPage($message, $shareList)
 	{
 		return $_SERVER["DOCUMENT_ROOT"] . "/../webshare/adminPage_sample.php"; // Path to admin page which offers form to add shares
 	}
