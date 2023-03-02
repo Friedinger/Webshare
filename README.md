@@ -51,7 +51,7 @@ The admin page must offer a form to add a share which consists of the following 
 	<input type="text" name="uri" required /><br />
 	<input type="file" name="file" /><br />
 	<input type="url" name="link" /><br />
-	<label>Password: </label><input type="text" name="password" /><br />
+	<input type="text" name="password" /><br />
 	<input type="datetime-local" name="expireDate" /><br />
 	<input type="submit" name="submit" /><br />
 </form>
@@ -61,6 +61,20 @@ The following PHP code should also be included to display messages after attempt
 
 ```php
 <?php print($message) ?>
+```
+
+To display the list of existing shares, a table has to be added to the admin page:
+
+```html
+<table>
+	<th style="width: 50px;">URI</th>
+	<th style="width: 300px;">File</th>
+	<th style="width: 300px;">Link</th>
+	<th style="width: 90px;">Password</th>
+	<th style="width: 180px;">Expire Date</th>
+	<th style="width: 180px;">Create Date</th>
+	<?php print($shareList) ?>
+</table>
 ```
 
 A sample admin page can be found [here](/webshare/adminPage_sample.php).
@@ -80,12 +94,6 @@ The view page must include an iframe to preview the shared file. Therefore, the 
 
 A sample view page can be found [here](/webshare/viewPage_sample.php).
 
-### Error 404 page
-
-The error 404 page has no required parts but it should inform the user that an error 404 occurred.
-
-A sample error 404 page can be found [here](/webshare/404Page_sample.php).
-
 ### Password page
 
 The password page must contain a form to enter the password to access the protected share.
@@ -104,6 +112,12 @@ Furthermore, the following PHP code should be included to display messages, for 
 ```
 
 A sample password page can be found [here](/webshare/passwordPage_sample.php).
+
+### Error 404 page
+
+The error 404 page has no required parts but it should inform the user that an error 404 occurred.
+
+A sample error 404 page can be found [here](/webshare/404Page_sample.php).
 
 ## Credit and License
 
