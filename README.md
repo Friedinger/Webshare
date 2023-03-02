@@ -63,16 +63,16 @@ The following PHP code should also be included to display messages after attempt
 <?php print($message) ?>
 ```
 
-To display the list of existing shares, a table has to be added to the admin page:
+To display the list of existing shares, a table must be added to the admin page. The php script outputs the table data.
 
 ```html
 <table>
-	<th style="width: 50px;">URI</th>
-	<th style="width: 300px;">File</th>
-	<th style="width: 300px;">Link</th>
-	<th style="width: 90px;">Password</th>
-	<th style="width: 180px;">Expire Date</th>
-	<th style="width: 180px;">Create Date</th>
+	<th>URI</th>
+	<th>File</th>
+	<th>Link</th>
+	<th>Password</th>
+	<th>Expire Date</th>
+	<th>Create Date</th>
 	<?php print($shareList) ?>
 </table>
 ```
