@@ -24,7 +24,7 @@ function addShare()
 	$uri = mysqli_real_escape_string($db, htmlspecialchars($_POST["uri"]));
 	$expireDate = mysqli_real_escape_string($db, htmlspecialchars($_POST["expireDate"]));
 	$password = mysqli_real_escape_string($db, htmlspecialchars($_POST["password"]));
-	$password = password_hash($password, PASSWORD_DEFAULT); // Hash password
+	if (!empty($password)) $password = password_hash($password, PASSWORD_DEFAULT); // Hash password
 	if (empty($expireDate)) $expireDate = null;
 	if ($_FILES["file"]["name"] && !empty($_POST["link"])) return WebshareConfig::addingMessages("errorBoth");
 	// Add file
@@ -99,8 +99,8 @@ function linkToShare($uri, $type)
 	if ($type == "long") {
 		$copyShareLink = "
 		<a href='javascript:void(0);' onclick='navigator.clipboard.writeText(`https://" . $shareLink . "`);'>
-		<div class='copy-icon'>
-		</div></a>
+			<span class='copy-icon'></span>
+		</a>
 		";
 		return "<a href='//" . $shareLink . "'>https://" . $shareLink . "</a> " . $copyShareLink;
 	}

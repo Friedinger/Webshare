@@ -14,6 +14,11 @@
 			color-scheme: dark;
 		}
 
+		p {
+			color: inherit;
+			background-color: inherit;
+		}
+
 		a {
 			color: inherit;
 			background-color: inherit;
