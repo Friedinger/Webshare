@@ -141,7 +141,7 @@
 		<label>Password: </label><input type="text" name="password"><br>
 		<input type="submit" value="Add share" name="submit"><br>
 	</form>
-	<?php print($message) ?>
+	<p><?php print($message) ?></p>
 	<div class="shareList">
 		<table>
 			<th style="width: 50px;">URI</th>
