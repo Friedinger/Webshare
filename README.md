@@ -59,6 +59,8 @@ The admin page must offer a form to add a share which consists of the following 
 
 The following PHP code should also be included to display messages after attempting to add the share.
 
+The messages displayed after submitting the form can be customized in the Webshare configuration.
+
 ```php
 <?php print($message) ?>
 ```
@@ -78,8 +80,6 @@ To display the list of existing shares, a table must be added to the admin page.
 ```
 
 A sample admin page can be found [here](/webshare/adminPage_sample.php).
-
-The messages displayed after submitting the form can be customized in the Webshare configuration.
 
 ### View page
 
