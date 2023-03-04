@@ -58,7 +58,6 @@ The admin page must offer a form to add a share which consists of the following 
 ```
 
 The following PHP code should also be included to display messages after attempting to add the share.
-
 The messages displayed after submitting the form can be customized in the Webshare configuration.
 
 ```php
