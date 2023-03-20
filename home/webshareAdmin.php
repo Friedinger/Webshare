@@ -83,18 +83,20 @@ function listShares()
 			<td>" . $sharePassword . "</td>
 			<td>" . htmlspecialchars($shareContent["expireDate"]) . "</td>
 			<td>" . htmlspecialchars($shareContent["createDate"]) . "</td>
+			<td>" . linkToShare(htmlspecialchars($shareContent["uri"]) . "?action=delete", "short", "Delete") . "</td>
 		</tr>
 		";
 	}
 	return $shareList;
 }
 
-function linkToShare($uri, $type)
+function linkToShare($uri, $type, $text = false)
 {
+	if (!$text) $text = $uri;
 	$shareLink =  $_SERVER["HTTP_HOST"] . dirname($_SERVER["PHP_SELF"]) . "/" . $uri;
 	$shareLink = str_replace("\\", "", $shareLink);
 	if ($type == "short") {
-		return "<a href='//" . $shareLink . "'>" . $uri . "</a> ";
+		return "<a href='//" . $shareLink . "'>" . $text . "</a> ";
 	}
 	if ($type == "long") {
 		$copyShareLink = "

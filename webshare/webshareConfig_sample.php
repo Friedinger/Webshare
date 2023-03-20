@@ -18,6 +18,10 @@ class WebshareConfig
 	{
 		return $_SERVER["DOCUMENT_ROOT"] . "/../webshare/passwordPage_sample.php"; // Path to password page for protected shares
 	}
+	public static function pathDeletePage($uri, $status)
+	{
+		return $_SERVER["DOCUMENT_ROOT"] . "/../webshare/deletePage_sample.php"; // Path to page to delete shares
+	}
 	public static function path404Page()
 	{
 		return $_SERVER["DOCUMENT_ROOT"] . "/../webshare/404Page_sample.php"; // Path to page for error 404

@@ -19,6 +19,9 @@ if (str_starts_with($request, "admin")) {
 }
 
 $share = getShare($request);
+if (isset($share["uri"]) && isset($_GET["action"]) && $_GET["action"] == "delete" && WebshareConfig::adminPageAccess()) {
+	deleteShare($share);
+}
 if (isset($share["password"])) {
 	passwordProtection($share);
 }
@@ -53,6 +56,7 @@ function getShare($request)
 		mysqli_stmt_execute($deleteShare);
 		error404();
 	}
+	mysqli_close($db);
 	return $share;
 }
 
@@ -108,6 +112,22 @@ function viewPage($share, $installPath)
 	$iframeSrc = $installPath . $share["uri"];
 	$iframeTitle = $share["file"];
 	require(WebshareConfig::pathViewPage($iframeSrc, $iframeTitle));
+	exit;
+}
+
+function deleteShare($share)
+{
+	$uri = $share["uri"];
+	if (isset($_POST["share"]) && $_POST["share"] == $share["uri"]) {
+		$db = mysqli_connect(WebshareConfig::dbHost(), WebshareConfig::dbUsername(), WebshareConfig::dbPassword(), WebshareConfig::dbName());
+		$deleteShare = mysqli_prepare($db, "DELETE FROM " . WebshareConfig::dbTableWebshare() . " WHERE uri=?");
+		mysqli_stmt_bind_param($deleteShare, "s", $share["uri"]);
+		mysqli_stmt_execute($deleteShare);
+		mysqli_close($db);
+		$status = "success";
+	}
+	if (!isset($status)) $status = "default";
+	require(WebshareConfig::pathDeletePage($uri, $status));
 	exit;
 }
 
