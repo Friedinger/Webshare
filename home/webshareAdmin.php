@@ -37,6 +37,7 @@ function addShare()
 			case 0:
 				$type = "file";
 				$value = mysqli_real_escape_string($db, $_FILES["file"]["name"]);
+				move_uploaded_file($_FILES["file"]["tmp_name"], WebshareConfig::pathStorage() . $uri);
 				break;
 			case 1:
 				return WebshareConfig::addingMessages("errorUploadSize");

@@ -99,8 +99,10 @@ function viewPage($share, $installPath)
 
 function passwordProtection($share)
 {
+	if (!empty($_SESSION["webshare"][$share["uri"]])) return;
 	if (isset($_POST["password"])) {
 		if (password_verify(htmlspecialchars($_POST["password"]), $share["password"])) {
+			$_SESSION["webshare"][$share["uri"]] = true;
 			return;
 		}
 		$message = WebshareConfig::passwordMessages("incorrect");
