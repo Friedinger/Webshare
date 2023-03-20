@@ -35,15 +35,9 @@ function addShare()
 	if ($_FILES["file"]["name"]) {
 		switch ($_FILES["file"]["error"]) {
 			case 0:
-				$file = mysqli_real_escape_string($db, $_FILES["file"]["name"]);
-				$addShare = mysqli_prepare($db, "INSERT IGNORE INTO " . WebshareConfig::dbTableWebshare() . " (uri, file, password, expireDate) VALUES (?, ?, ?, ?)");
-				mysqli_stmt_bind_param($addShare, "ssss", $uri, $file, $password, $expireDate);
-				mysqli_stmt_execute($addShare);
-				if (mysqli_stmt_affected_rows($addShare)) {
-					move_uploaded_file($_FILES["file"]["tmp_name"], WebshareConfig::pathStorage() . $uri);
-					return WebshareConfig::addingMessages("success") . " " . linkToShare($uri, "long");
-				}
-				return WebshareConfig::addingMessages("errorUri");
+				$type = "file";
+				$value = mysqli_real_escape_string($db, $_FILES["file"]["name"]);
+				break;
 			case 1:
 				return WebshareConfig::addingMessages("errorUploadSize");
 			default:
@@ -51,11 +45,15 @@ function addShare()
 		}
 	}
 	// Add link
-	if (!empty($_POST["link"])) {
-		$link = mysqli_real_escape_string($db, $_POST["link"]);
-		if (!preg_match("/^https?:\/\//", $link)) $link = "https://" . $link;
-		$addShare = mysqli_prepare($db, "INSERT IGNORE INTO " . WebshareConfig::dbTableWebshare() . " (uri, link, password, expireDate) VALUES (?, ?, ?, ?)");
-		mysqli_stmt_bind_param($addShare, "ssss", $uri, $link, $password, $expireDate);
+	if ($_POST["link"]) {
+		$type = "link";
+		$value = mysqli_real_escape_string($db, $_POST["link"]);
+		if (!preg_match("/^https?:\/\//", $value)) $value = "https://" . $value;
+	}
+	// Add share
+	if ($type) {
+		$addShare = mysqli_prepare($db, "INSERT IGNORE INTO " . WebshareConfig::dbTableWebshare() . " (uri, type, value, password, expireDate) VALUES (?, ?, ?, ?, ?)");
+		mysqli_stmt_bind_param($addShare, "sssss", $uri, $type, $value, $password, $expireDate);
 		mysqli_stmt_execute($addShare);
 		if (mysqli_stmt_affected_rows($addShare)) {
 			return WebshareConfig::addingMessages("success") . " " . linkToShare($uri, "long");
@@ -82,8 +80,8 @@ function listShares()
 		$shareList .= "
 		<tr>
 			<td>" . linkToShare(htmlspecialchars($shareContent["uri"]), "short") . "</a></td>
-			<td>" . htmlspecialchars($shareContent["file"]) . "</td>
-			<td>" . htmlspecialchars($shareContent["link"]) . "</td>
+			<td>" . htmlspecialchars($shareContent["type"]) . "</td>
+			<td>" . htmlspecialchars($shareContent["value"]) . "</td>
 			<td>" . $sharePassword . "</td>
 			<td>" . htmlspecialchars($shareContent["expireDate"]) . "</td>
 			<td>" . htmlspecialchars($shareContent["createDate"]) . "</td>

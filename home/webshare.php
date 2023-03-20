@@ -25,14 +25,11 @@ if (isset($share["uri"]) && isset($_GET["action"]) && $_GET["action"] == "delete
 if (isset($share["password"])) {
 	passwordProtection($share);
 }
-if (isset($share["link"])) {
+if ($share["type"] == "link") {
 	redirectLink($share);
 }
-if (isset($share["file"])) {
-	if (isset($_GET["action"])) {
-		redirectFile($share);
-	}
-	viewPage($share, $installPath);
+if ($share["type"] == "file") {
+	redirectFile($share, $installPath);
 }
 error404();
 
@@ -48,9 +45,7 @@ function getShare($request)
 	mysqli_stmt_execute($getShare);
 	$share = mysqli_fetch_assoc(mysqli_stmt_get_result($getShare));
 	if (isset($share["expireDate"]) && strtotime($share["expireDate"]) < time()) {
-		if (isset($share["file"])) {
-			unlink(WebshareConfig::pathStorage() . $share["uri"]);
-		}
+		if ($share["type"] == "file") unlink(WebshareConfig::pathStorage() . $share["uri"]);
 		$deleteShare = mysqli_prepare($db, "DELETE FROM " . WebshareConfig::dbTableWebshare() . " WHERE uri=?");
 		mysqli_stmt_bind_param($deleteShare, "s", $share["uri"]);
 		mysqli_stmt_execute($deleteShare);
@@ -62,34 +57,36 @@ function getShare($request)
 
 function redirectLink($share)
 {
-	header("Location:" . $share["link"]);
+	header("Location:" . $share["value"]);
 	exit;
 }
 
-function redirectFile($share)
+function redirectFile($share, $installPath)
 {
-	if ($_GET["action"] == "show") {
-		$file = WebshareConfig::pathStorage() . $share["uri"];
-		if (!file_exists($file)) {
-			error404();
+	if (isset($_GET["action"])) {
+		if ($_GET["action"] == "show") {
+			$file = WebshareConfig::pathStorage() . $share["uri"];
+			if (!file_exists($file)) {
+				error404();
+			}
+			header("Content-Disposition: inline; filename=" . $share["value"]);
+			header("Content-Type: " . getMime($share["value"]));
+			header("Content-Length: " . filesize($file));
+			readfile($file);
+			exit;
+		} elseif ($_GET["action"] == "download") {
+			$file = WebshareConfig::pathStorage() . $share["uri"];
+			if (!file_exists($file)) {
+				error404();
+			}
+			header("Content-Disposition: attachment; filename=" . $share["value"]);
+			header("Content-Type: " . getMime($share["value"]));
+			header("Content-Length: " . filesize($file));
+			readfile($file);
+			exit;
 		}
-		header("Content-Disposition: inline; filename=" . $share["file"]);
-		header("Content-Type: " . getMime($share["file"]));
-		header("Content-Length: " . filesize($file));
-		readfile($file);
-		exit;
-	} elseif ($_GET["action"] == "download") {
-		$file = WebshareConfig::pathStorage() . $share["uri"];
-		if (!file_exists($file)) {
-			error404();
-		}
-		header("Content-Disposition: attachment; filename=" . $share["file"]);
-		header("Content-Type: " . getMime($share["file"]));
-		header("Content-Length: " . filesize($file));
-		readfile($file);
-		exit;
 	}
-	error404();
+	viewPage($share, $installPath);
 }
 
 function passwordProtection($share)
@@ -110,7 +107,7 @@ function passwordProtection($share)
 function viewPage($share, $installPath)
 {
 	$iframeSrc = $installPath . $share["uri"];
-	$iframeTitle = $share["file"];
+	$iframeTitle = $share["value"];
 	require(WebshareConfig::pathViewPage($iframeSrc, $iframeTitle));
 	exit;
 }
