@@ -64,7 +64,7 @@ function redirectLink($share)
 function redirectFile($share, $installPath)
 {
 	if (isset($_GET["action"])) {
-		if ($_GET["action"] == "show") {
+		if ($_GET["action"] == "view") {
 			$file = WebshareConfig::pathStorage() . $share["uri"];
 			if (!file_exists($file)) {
 				error404();
@@ -89,6 +89,14 @@ function redirectFile($share, $installPath)
 	viewPage($share, $installPath);
 }
 
+function viewPage($share, $installPath)
+{
+	$iframeSrc = $installPath . $share["uri"];
+	$iframeTitle = $share["value"];
+	require(WebshareConfig::pathViewPage($iframeSrc, $iframeTitle));
+	exit;
+}
+
 function passwordProtection($share)
 {
 	if (isset($_POST["password"])) {
@@ -104,13 +112,6 @@ function passwordProtection($share)
 	exit;
 }
 
-function viewPage($share, $installPath)
-{
-	$iframeSrc = $installPath . $share["uri"];
-	$iframeTitle = $share["value"];
-	require(WebshareConfig::pathViewPage($iframeSrc, $iframeTitle));
-	exit;
-}
 
 function deleteShare($share)
 {

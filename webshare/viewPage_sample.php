@@ -158,7 +158,7 @@
 			<span id="copyLink">Copy Link</span>
 		</a>
 	</header>
-	<iframe src="<?php print($iframeSrc) ?>?action=show" title="<?php print($iframeTitle) ?>"></iframe>
+	<iframe src="<?php print($iframeSrc) ?>?action=view" title="<?php print($iframeTitle) ?>"></iframe>
 </body>
 
 </html>
