@@ -4,7 +4,7 @@ require_once($_SERVER["DOCUMENT_ROOT"] . "/../webshare/webshareConfig.php");
 
 // Get request and exempt admin page
 $installPath = str_replace("\\", "", dirname($_SERVER["PHP_SELF"]) . "/");
-$request = htmlspecialchars($_SERVER["REQUEST_URI"]); // Remove special chars from request
+$request = htmlspecialchars(strtolower($_SERVER["REQUEST_URI"])); // Remove special chars from request
 $request = str_replace($installPath, "", $request); // Remove install path from request
 $request = explode("?", $request)[0]; // Remove parameters
 $request = rtrim($request, "/"); // Remove trailing slash
