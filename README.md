@@ -10,6 +10,7 @@ Webshare: A simple, lightweight, self hosted webservice to easily share files an
 -   Store files in a custom directory on the webserver
 -   Store share data in a MySQL database
 -   Show existing shares in admin page
+-   Delete shares from admin page
 
 ## Installation
 
@@ -23,8 +24,8 @@ Webshare: A simple, lightweight, self hosted webservice to easily share files an
     | name | type | null | default |
     | ---- | ---- | ---- | ---- |
     | uri | varchar(255) | no | none |
-    | file | varchar(255) | yes | NULL |
-    | link | varchar(255) | yes | NULL |
+    | type | varchar(255) | no | none |
+    | value | varchar(255) | no | none |
     | password | varchar(255) | yes | NULL |
     | expireDate | timestamp | yes | NULL |
     | createDate | timestamp | no | current_timestamp() |
@@ -69,11 +70,12 @@ To display the list of existing shares, a table must be added to the admin page.
 ```html
 <table>
 	<th>URI</th>
-	<th>File</th>
-	<th>Link</th>
+	<th>Type</th>
+	<th>Value</th>
 	<th>Password</th>
 	<th>Expire Date</th>
 	<th>Create Date</th>
+	<th>Action</th>
 	<?php print($shareList) ?>
 </table>
 ```
@@ -86,7 +88,7 @@ The view page must include an iframe to preview the shared file. Therefore, the 
 
 ```html
 <iframe
-	src="<?php print($iframeSrc) ?>?action=show"
+	src="<?php print($iframeSrc) ?>?action=view"
 	title="<?php print($iframeTitle) ?>">
 </iframe>
 ```
@@ -111,6 +113,27 @@ Furthermore, the following PHP code should be included to display messages, for 
 ```
 
 A sample password page can be found [here](/webshare/passwordPage_sample.php).
+
+### Delete page
+
+The delete page must include a form to confirm the deletion of a share. For that reason, a the following form should be used:
+
+```html
+<form method="post">
+	<input type="hidden" name="share" value="<?php print($uri) ?>" />
+	<input type="submit" name="submit" value="Delete" /><br />
+</form>
+```
+
+To inform the user about a successful deletion, a messages can be printed after checking the deletion status with this PHP code:
+
+```php
+<?php if ($status == "success") { ?>
+// Success message in HTML
+<?php } else { ?>
+// Form from above
+<?php } ?>
+```
 
 ### Error 404 page
 

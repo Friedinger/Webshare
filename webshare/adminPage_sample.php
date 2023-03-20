@@ -155,7 +155,7 @@
 			<th style="width: 90px;">Password</th>
 			<th style="width: 180px;">Expire Date</th>
 			<th style="width: 180px;">Create Date</th>
-			<th style="width: 60px;">Delete</th>
+			<th style="width: 60px;">Action</th>
 			<?php print($shareList) ?>
 		</table>
 	</div>
