@@ -146,19 +146,33 @@
 		<label>Password: </label><input type="text" name="password"><br>
 		<input type="submit" value="Add share" name="submit"><br>
 	</form>
-	<p><?php print($message) ?></p>
-	<div class="shareList">
-		<table>
-			<th style="width: 50px;">URI</th>
-			<th style="width: 50px;">Type</th>
-			<th style="width: 300px;">Value</th>
-			<th style="width: 90px;">Password</th>
-			<th style="width: 180px;">Expire Date</th>
-			<th style="width: 180px;">Create Date</th>
-			<th style="width: 60px;">Action</th>
-			<?php print($shareList) ?>
-		</table>
-	</div>
+	<p><?php if ($status[0] == "success") { ?></p>
+	<p>Share added successfully: <?php print($status[1]) ?></p>
+<?php }
+		if ($status[0] == "errorBoth") { ?>
+	<p>Share adding failed: File and link offered, please only choose one.</p>
+<?php }
+		if ($status[0] == "errorUri") { ?>
+	<p>Share adding failed: URI invalid, please chose a different one.</p>
+<?php }
+		if ($status[0] == "errorUploadSize") { ?>
+	<p>Share adding failed: File size limit exceeded.</p>
+<?php }
+		if ($status[0] == "errorDefault") { ?>
+	<p>Share adding failed.</p>
+<?php } ?>
+<div class="shareList">
+	<table>
+		<th style="width: 50px;">URI</th>
+		<th style="width: 50px;">Type</th>
+		<th style="width: 300px;">Value</th>
+		<th style="width: 90px;">Password</th>
+		<th style="width: 180px;">Expire Date</th>
+		<th style="width: 180px;">Create Date</th>
+		<th style="width: 60px;">Action</th>
+		<?php print($shareList) ?>
+	</table>
+</div>
 </body>
 
 </html>

@@ -6,15 +6,15 @@ class WebshareConfig
 	{
 		return $_SERVER["DOCUMENT_ROOT"] . "/../webshare/files/"; // Path to file storage, relativ from document root. Important: Trailing slash at the end
 	}
-	public static function pathAdminPage($message, $shareList)
+	public static function pathAdminPage($status, $shareList)
 	{
 		return $_SERVER["DOCUMENT_ROOT"] . "/../webshare/adminPage_sample.php"; // Path to admin page which offers form to add shares
 	}
-	public static function pathViewPage($iframeSrc, $iframeTitle)
+	public static function pathViewPage($shareFileName, $shareLink)
 	{
 		return $_SERVER["DOCUMENT_ROOT"] . "/../webshare/viewPage_sample.php"; // Path to view page which displays a preview of requested file
 	}
-	public static function pathPasswordPage($message)
+	public static function pathPasswordPage($status)
 	{
 		return $_SERVER["DOCUMENT_ROOT"] . "/../webshare/passwordPage_sample.php"; // Path to password page for protected shares
 	}
@@ -45,25 +45,6 @@ class WebshareConfig
 	public static function dbTableWebshare()
 	{
 		return "webshare"; // Mysql database table to store webshare data
-	}
-	public static function addingMessages($message)
-	{
-		$messages = [
-			"success" => "Share added successfully: ", // Message if share added successfully
-			"errorBoth" => "Share adding failed: File and link offered, please only choose one.", // Message if file and link options were set
-			"errorUri" => "Share adding failed: URI invalid, please chose a different one.", // Message if chosen URI is invalid
-			"errorUploadSize" => "Share adding failed: File size limit exceeded.", // Message if file size limit is exceeded
-			"error" => "Share adding failed.", // Message at other errors
-		];
-		return $messages[$message];
-	}
-	public static function passwordMessages($message)
-	{
-		$messages = [
-			"standard" => "Please enter the password to access the share.", // Message if password protected share is requested
-			"incorrect" => "The entered password is incorrect. Please try again.", // Message if entered password is incorrect
-		];
-		return $messages[$message];
 	}
 	public static function adminPageAccess()
 	{

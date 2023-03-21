@@ -19,17 +19,19 @@ if (str_starts_with($request, "admin")) {
 }
 
 $share = getShare($request);
-if (isset($share["uri"]) && isset($_GET["action"]) && $_GET["action"] == "delete" && WebshareConfig::adminPageAccess()) {
-	deleteShare($share);
-}
-if (isset($share["password"])) {
-	passwordProtection($share);
-}
-if ($share["type"] == "link") {
-	redirectLink($share);
-}
-if ($share["type"] == "file") {
-	redirectFile($share, $installPath);
+if (isset($share)) {
+	if (isset($_GET["action"]) && $_GET["action"] == "delete" && WebshareConfig::adminPageAccess()) {
+		deleteShare($share);
+	}
+	if (isset($share["password"])) {
+		passwordProtection($share);
+	}
+	if ($share["type"] == "link") {
+		redirectLink($share);
+	}
+	if ($share["type"] == "file") {
+		redirectFile($share, $installPath);
+	}
 }
 error404();
 
@@ -86,14 +88,14 @@ function redirectFile($share, $installPath)
 			exit;
 		}
 	}
-	viewPage($share, $installPath);
+	viewPage($share);
 }
 
-function viewPage($share, $installPath)
+function viewPage($share)
 {
-	$iframeSrc = $installPath . $share["uri"];
-	$iframeTitle = $share["value"];
-	require(WebshareConfig::pathViewPage($iframeSrc, $iframeTitle));
+	$shareLink = $_SERVER["HTTP_HOST"] . dirname($_SERVER["PHP_SELF"]) . "/" . $share["uri"];
+	$shareFileName = $share["value"];
+	require(WebshareConfig::pathViewPage($shareFileName, $shareLink));
 	exit;
 }
 
@@ -105,12 +107,12 @@ function passwordProtection($share)
 			$_SESSION["webshare"][$share["uri"]] = true;
 			return;
 		}
-		$message = WebshareConfig::passwordMessages("incorrect");
-		require(WebshareConfig::pathPasswordPage($message));
+		$status = "incorrect";
+		require(WebshareConfig::pathPasswordPage($status));
 		exit;
 	}
-	$message = WebshareConfig::passwordMessages("standard");
-	require(WebshareConfig::pathPasswordPage($message));
+	$status = "default";
+	require(WebshareConfig::pathPasswordPage($status));
 	exit;
 }
 

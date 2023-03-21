@@ -2,7 +2,7 @@
 <html lang="en">
 
 <head>
-	<title>Webshare | <?php print($iframeTitle) ?></title>
+	<title>Webshare | <?php print($shareFileName) ?></title>
 	<meta name='viewport' content='width=device-width, initial-scale=1.0'>
 	<style>
 		html {
@@ -134,7 +134,7 @@
 	</style>
 	<script>
 		function copyLink() {
-			navigator.clipboard.writeText("<?php print("https://" . $_SERVER["HTTP_HOST"] . dirname($_SERVER["PHP_SELF"]) . "/" . $share["uri"]) ?>");
+			navigator.clipboard.writeText("<?php print("https://" . $shareLink) ?>");
 			document.getElementById("copyLink").innerHTML = "Link copied";
 		}
 
@@ -148,8 +148,8 @@
 
 <body>
 	<header>
-		<div class="fileName"><?php print($iframeTitle) ?></div>
-		<a href="<?php print($share["uri"]) ?>?action=download">
+		<div class="fileName"><?php print($shareFileName) ?></div>
+		<a href="?action=download">
 			<div class="download-icon"></div>
 			Download
 		</a>
@@ -158,7 +158,7 @@
 			<span id="copyLink">Copy Link</span>
 		</a>
 	</header>
-	<iframe src="<?php print($iframeSrc) ?>?action=view" title="<?php print($iframeTitle) ?>"></iframe>
+	<iframe src="?action=view" title="<?php print($shareFileName) ?>"></iframe>
 </body>
 
 </html>

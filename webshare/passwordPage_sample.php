@@ -69,7 +69,11 @@
 		<label>Password: </label><input type="password" name="password"><br>
 		<input type="submit" value="Submit password" name="submit"><br>
 	</form>
-	<?php print($message) ?>
+	<?php if ($status == "incorrect") { ?>
+		<p>The entered password is incorrect, please try again.</p>
+	<?php } else { ?>
+		<p>Please enter the password to access the share.</p>
+	<?php } ?>
 </body>
 
 </html>

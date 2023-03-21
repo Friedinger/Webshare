@@ -8,13 +8,11 @@ if (!WebshareConfig::adminPageAccess()) {
 	exit;
 }
 
-$message = "";
 if (!empty($_POST["submit"]) && WebshareConfig::adminPageAccess()) {
-	$message = addShare();
-	if (isset($db)) mysqli_close($db);
-}
+	$status = addShare();
+} else $status[] = "";
 $shareList = listShares();
-include(WebshareConfig::pathAdminPage($message, $shareList));
+include(WebshareConfig::pathAdminPage($status, $shareList));
 
 // Add a new share
 function addShare()
@@ -30,19 +28,19 @@ function addShare()
 		$password = password_hash($password, PASSWORD_DEFAULT); // Hash password
 	}
 	if (empty($expireDate)) $expireDate = null;
-	if ($_FILES["file"]["name"] && !empty($_POST["link"])) return WebshareConfig::addingMessages("errorBoth");
+	if ($_FILES["file"]["name"] && !empty($_POST["link"])) return "errorBoth";
 	// Add file
 	if ($_FILES["file"]["name"]) {
 		switch ($_FILES["file"]["error"]) {
-			case 0:
+			case 1:
 				$type = "file";
 				$value = mysqli_real_escape_string($db, $_FILES["file"]["name"]);
 				move_uploaded_file($_FILES["file"]["tmp_name"], WebshareConfig::pathStorage() . $uri);
 				break;
-			case 1:
-				return WebshareConfig::addingMessages("errorUploadSize");
+			case 0:
+				return ["errorUploadSize"];
 			default:
-				return WebshareConfig::addingMessages("error");
+				return ["errorDefault"];
 		}
 	}
 	// Add link
@@ -51,17 +49,18 @@ function addShare()
 		$value = mysqli_real_escape_string($db, $_POST["link"]);
 		if (!preg_match("/^https?:\/\//", $value)) $value = "https://" . $value;
 	}
-	// Add share
+	// Add share to database
 	if ($type) {
 		$addShare = mysqli_prepare($db, "INSERT IGNORE INTO " . WebshareConfig::dbTableWebshare() . " (uri, type, value, password, expireDate) VALUES (?, ?, ?, ?, ?)");
 		mysqli_stmt_bind_param($addShare, "sssss", $uri, $type, $value, $password, $expireDate);
 		mysqli_stmt_execute($addShare);
+		mysqli_close($db);
 		if (mysqli_stmt_affected_rows($addShare)) {
-			return WebshareConfig::addingMessages("success") . " " . linkToShare($uri, "long");
+			return ["success", linkToShare($uri, "long")];
 		}
-		return WebshareConfig::addingMessages("errorUri");
+		return ["errorUri"];
 	}
-	return WebshareConfig::addingMessages("error");
+	return ["errorDefault"];
 }
 
 // List shares in table
