@@ -136,9 +136,6 @@
 		function copyLink() {
 			navigator.clipboard.writeText("<?php print("https://" . $shareLink) ?>");
 			document.getElementById("copyLink").innerHTML = "Link copied";
-		}
-
-		function resetCopyLink() {
 			setTimeout(function() {
 				document.getElementById("copyLink").innerHTML = "Copy Link";
 			}, 1000)
@@ -153,7 +150,7 @@
 			<div class="download-icon"></div>
 			Download
 		</a>
-		<a href="javascript:void(0);" onclick="copyLink();" onmouseout="resetCopyLink();">
+		<a href="javascript:void(0);" onclick="copyLink();">
 			<div class="copy-icon"></div>
 			<span id="copyLink">Copy Link</span>
 		</a>
