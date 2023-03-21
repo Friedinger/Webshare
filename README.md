@@ -141,10 +141,10 @@ The error 404 page has no required parts but it should inform the user that an e
 
 A sample error 404 page can be found [here](/webshare/404Page_sample.php).
 
-## Credit and License
+## Credit and license
 
-Webshare is developed by [Friedinger](https://friedinger.org "friedinger.org").
+© 2023
+[Friedinger](https://friedinger.org "friedinger.org")
 
-You can use webshare for free, private and commercial, but you have to include the credit of the developer.
-
-(And it would be kind if you would inform me that you use my project, so that I know it is used :D)
+License: [MIT License
+](https://github.com/Friedinger/Webshare/blob/main/LICENSE)
