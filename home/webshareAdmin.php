@@ -32,12 +32,12 @@ function addShare()
 	// Add file
 	if ($_FILES["file"]["name"]) {
 		switch ($_FILES["file"]["error"]) {
-			case 1:
+			case 0:
 				$type = "file";
-				$value = mysqli_real_escape_string($db, $_FILES["file"]["name"]);
+				$value = mysqli_real_escape_string($db, htmlspecialchars($_FILES["file"]["name"]));
 				move_uploaded_file($_FILES["file"]["tmp_name"], WebshareConfig::pathStorage() . $uri);
 				break;
-			case 0:
+			case 1:
 				return ["errorUploadSize"];
 			default:
 				return ["errorDefault"];

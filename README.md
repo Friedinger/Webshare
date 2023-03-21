@@ -61,7 +61,8 @@ The admin page must offer a form to add a share which consists of the following 
 The following PHP code should also be included to display messages after attempting to add the share.
 
 ```php
-<?php if ($status[0] == "success") { ?>
+<?php
+if ($status[0] == "success") { ?>
 	// Success message, add the php line below to output a link and a copy icon to the share.
 	<?php print($status[1]) ?>
 <?php }

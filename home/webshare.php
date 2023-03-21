@@ -21,7 +21,7 @@ if (str_starts_with($request, "admin")) {
 $share = getShare($request);
 if (isset($share)) {
 	if (isset($_GET["action"]) && $_GET["action"] == "delete" && WebshareConfig::adminPageAccess()) {
-		deleteShare($share);
+		deletePage($share);
 	}
 	if (isset($share["password"])) {
 		passwordProtection($share);
@@ -47,10 +47,7 @@ function getShare($request)
 	mysqli_stmt_execute($getShare);
 	$share = mysqli_fetch_assoc(mysqli_stmt_get_result($getShare));
 	if (isset($share["expireDate"]) && strtotime($share["expireDate"]) < time()) {
-		if ($share["type"] == "file") unlink(WebshareConfig::pathStorage() . $share["uri"]);
-		$deleteShare = mysqli_prepare($db, "DELETE FROM " . WebshareConfig::dbTableWebshare() . " WHERE uri=?");
-		mysqli_stmt_bind_param($deleteShare, "s", $share["uri"]);
-		mysqli_stmt_execute($deleteShare);
+		deleteShare($share);
 		error404();
 	}
 	mysqli_close($db);
@@ -117,20 +114,26 @@ function passwordProtection($share)
 }
 
 
-function deleteShare($share)
+function deletePage($share)
 {
 	$uri = $share["uri"];
 	if (isset($_POST["share"]) && $_POST["share"] == $share["uri"]) {
-		$db = mysqli_connect(WebshareConfig::dbHost(), WebshareConfig::dbUsername(), WebshareConfig::dbPassword(), WebshareConfig::dbName());
-		$deleteShare = mysqli_prepare($db, "DELETE FROM " . WebshareConfig::dbTableWebshare() . " WHERE uri=?");
-		mysqli_stmt_bind_param($deleteShare, "s", $share["uri"]);
-		mysqli_stmt_execute($deleteShare);
-		mysqli_close($db);
+		deleteShare($share);
 		$status = "success";
 	}
 	if (!isset($status)) $status = "default";
 	require(WebshareConfig::pathDeletePage($uri, $status));
 	exit;
+}
+
+function deleteShare($share)
+{
+	if ($share["type"] == "file") unlink(WebshareConfig::pathStorage() . $share["uri"]);
+	$db = mysqli_connect(WebshareConfig::dbHost(), WebshareConfig::dbUsername(), WebshareConfig::dbPassword(), WebshareConfig::dbName());
+	$deleteShare = mysqli_prepare($db, "DELETE FROM " . WebshareConfig::dbTableWebshare() . " WHERE uri=?");
+	mysqli_stmt_bind_param($deleteShare, "s", $share["uri"]);
+	mysqli_stmt_execute($deleteShare);
+	mysqli_close($db);
 }
 
 // Throw error if request is not found
