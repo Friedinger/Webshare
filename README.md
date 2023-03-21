@@ -59,10 +59,24 @@ The admin page must offer a form to add a share which consists of the following 
 ```
 
 The following PHP code should also be included to display messages after attempting to add the share.
-The messages displayed after submitting the form can be customized in the Webshare configuration.
 
 ```php
-<?php print($message) ?>
+<?php if ($status[0] == "success") { ?>
+	// Success message, add the php line below to output a link and a copy icon to the share.
+	<?php print($status[1]) ?>
+<?php }
+if ($status[0] == "errorBoth") { ?>
+	// Message if share adding failed due to a provision of file and link input at the same time.
+<?php }
+if ($status[0] == "errorUri") { ?>
+	// Message if share adding failed because the entered URI is already in use.
+<?php }
+if ($status[0] == "errorUploadSize") { ?>
+	// Message if share adding failed due to an excess of the upload size.
+<?php }
+if ($status[0] == "errorDefault") { ?>
+	// Message if share adding failed for another reason.
+<?php } ?>
 ```
 
 To display the list of existing shares, a table must be added to the admin page. The php script outputs the table data.
@@ -87,10 +101,7 @@ A sample admin page can be found [here](/webshare/adminPage_sample.php).
 The view page must include an iframe to preview the shared file. Therefore, the source must be included with PHP.
 
 ```html
-<iframe
-	src="<?php print($iframeSrc) ?>?action=view"
-	title="<?php print($iframeTitle) ?>">
-</iframe>
+<iframe src="?action=view" title="<?php print($shareFileName) ?>"></iframe>
 ```
 
 A sample view page can be found [here](/webshare/viewPage_sample.php).
@@ -109,7 +120,11 @@ The password page must contain a form to enter the password to access the protec
 Furthermore, the following PHP code should be included to display messages, for example if the entered password is incorrect.
 
 ```php
-<?php print($message) ?>
+<?php if ($status == "incorrect") { ?>
+	// Message if the password is incorrect
+<?php } else { ?>
+	// Default message that requests the user to enter the password
+<?php } ?>
 ```
 
 A sample password page can be found [here](/webshare/passwordPage_sample.php).
@@ -129,9 +144,9 @@ To inform the user about a successful deletion, a messages can be printed after 
 
 ```php
 <?php if ($status == "success") { ?>
-// Success message in HTML
+	// Success message in HTML
 <?php } else { ?>
-// Form from above
+	// Form from above
 <?php } ?>
 ```
 
