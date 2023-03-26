@@ -119,7 +119,6 @@
 			order: 2;
 			flex-grow: 1;
 			max-height: calc(100% - 2.75rem);
-
 		}
 
 		main * {

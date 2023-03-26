@@ -62,22 +62,19 @@ function redirectLink($share)
 
 function redirectFile($share)
 {
+	$file = WebshareConfig::pathStorage() . $share["uri"];
+	if (!file_exists($file)) {
+		error404();
+	}
 	if (isset($_GET["action"])) {
 		if ($_GET["action"] == "view") {
-			$file = WebshareConfig::pathStorage() . $share["uri"];
-			if (!file_exists($file)) {
-				error404();
-			}
 			header("Content-Disposition: inline; filename=" . $share["value"]);
 			header("Content-Type: " . mime_content_type($file));
 			header("Content-Length: " . filesize($file));
 			readfile($file);
 			exit;
 		} elseif ($_GET["action"] == "download") {
-			$file = WebshareConfig::pathStorage() . $share["uri"];
-			if (!file_exists($file)) {
-				error404();
-			}
+
 			header("Content-Disposition: attachment; filename=" . $share["value"]);
 			header("Content-Type: " . mime_content_type($file));
 			header("Content-Length: " . filesize($file));
@@ -86,12 +83,8 @@ function redirectFile($share)
 		}
 	}
 	$sharePreview = "<iframe src='?action=view' title='" . $share["value"] . "'></iframe>";
-	$mime = mime_content_type(WebshareConfig::pathStorage() . $share["uri"]);
+	$mime = mime_content_type($file);
 	if (str_starts_with($mime, "text/")) {
-		$file = WebshareConfig::pathStorage() . $share["uri"];
-		if (!file_exists($file)) {
-			error404();
-		}
 		$sharePreview = "<code>" . str_replace("\n", "<br>", file_get_contents($file)) . "</code>";
 	}
 	if (str_starts_with($mime, "image/")) {
