@@ -96,7 +96,7 @@ function redirectFile($share)
 	if (str_starts_with($mime, "video/")) {
 		$sharePreview = "<video controls src='?action=view'></video>";
 	}
-	return viewPage($share, $sharePreview);
+	viewPage($share, $sharePreview);
 }
 
 function viewPage($share, $sharePreview)
@@ -128,7 +128,7 @@ function passwordProtection($share)
 function deletePage($share)
 {
 	$uri = $share["uri"];
-	if (isset($_POST["share"]) && $_POST["share"] == $share["uri"]) {
+	if (isset($_POST["share"]) && $_POST["share"] == $uri) {
 		deleteShare($share);
 		$status = "success";
 	}

@@ -14,11 +14,12 @@ Webshare: A simple, lightweight, self hosted webservice to easily share files an
 
 ## Installation
 
-1. Download the files from the repository and upload them to the webserver.
-2. Move the file to the correct location:
+1. Download the source code from the [latest release](https://github.com/Friedinger/Webshare/releases/latest).
+2. Unzip the files and upload them to your webserver.
+3. Move the file to the correct location:
     - The files in the _home_ directory must be inside the **root directory** of the webserver. They can be moved into a subdirectory.
     - The _webshare_ directory must be **in the parent directory** of the root directory of the webserver.
-3. Create MySQL table for Webshare:
+4. Create MySQL table for Webshare:
 
     It should have the following structure:
     | name | type | null | default |
@@ -32,7 +33,7 @@ Webshare: A simple, lightweight, self hosted webservice to easily share files an
 
     Make _uri_ a primary key index to ensure unique short links.
 
-4. Adjust config file:
+5. Adjust config file:
     - Set path to file storage.
     - Set path to _admin_, _view_ and _error 404_ page.
     - Set the database login information (_hostname_, _username_, _password_, _database name_ and _table name_ for Webshare).
