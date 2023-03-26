@@ -30,7 +30,7 @@ if (isset($share)) {
 		redirectLink($share);
 	}
 	if ($share["type"] == "file") {
-		redirectFile($share, $installPath);
+		redirectFile($share);
 	}
 }
 error404();
@@ -60,7 +60,7 @@ function redirectLink($share)
 	exit;
 }
 
-function redirectFile($share, $installPath)
+function redirectFile($share)
 {
 	if (isset($_GET["action"])) {
 		if ($_GET["action"] == "view") {
@@ -69,7 +69,7 @@ function redirectFile($share, $installPath)
 				error404();
 			}
 			header("Content-Disposition: inline; filename=" . $share["value"]);
-			header("Content-Type: " . getMime($share["value"]));
+			header("Content-Type: " . mime_content_type($file));
 			header("Content-Length: " . filesize($file));
 			readfile($file);
 			exit;
@@ -79,20 +79,38 @@ function redirectFile($share, $installPath)
 				error404();
 			}
 			header("Content-Disposition: attachment; filename=" . $share["value"]);
-			header("Content-Type: " . getMime($share["value"]));
+			header("Content-Type: " . mime_content_type($file));
 			header("Content-Length: " . filesize($file));
 			readfile($file);
 			exit;
 		}
 	}
-	viewPage($share);
+	$sharePreview = "<iframe src='?action=view' title='" . $share["value"] . "'></iframe>";
+	$mime = mime_content_type(WebshareConfig::pathStorage() . $share["uri"]);
+	if (str_starts_with($mime, "text/")) {
+		$file = WebshareConfig::pathStorage() . $share["uri"];
+		if (!file_exists($file)) {
+			error404();
+		}
+		$sharePreview = "<code>" . str_replace("\n", "<br>", file_get_contents($file)) . "</code>";
+	}
+	if (str_starts_with($mime, "image/")) {
+		$sharePreview = "<img src='?action=view' alt='" . $share["value"] . "'></img>";
+	}
+	if (str_starts_with($mime, "audio/")) {
+		$sharePreview = "<audio controls src='?action=view'></audio>";
+	}
+	if (str_starts_with($mime, "video/")) {
+		$sharePreview = "<video controls src='?action=view'></video>";
+	}
+	return viewPage($share, $sharePreview);
 }
 
-function viewPage($share)
+function viewPage($share, $sharePreview)
 {
 	$shareLink = $_SERVER["HTTP_HOST"] . dirname($_SERVER["PHP_SELF"]) . "/" . $share["uri"];
 	$shareFileName = $share["value"];
-	require(WebshareConfig::pathViewPage($shareFileName, $shareLink));
+	require(WebshareConfig::pathViewPage($sharePreview, $shareFileName, $shareLink));
 	exit;
 }
 
@@ -143,25 +161,4 @@ function error404()
 	header("Content-Type: text/html");
 	require(WebshareConfig::path404Page());
 	exit;
-}
-
-// Get mime type of file
-function getMime($file)
-{
-	$mimeTypes = array(
-		// List of mime types depending on file extension
-		"php" => "text/html",
-		"html" => "text/html",
-		"css" => "text/css",
-		"scss" => "text/css",
-		"js" => "application/x-javascript",
-		"vbs" => "application/x-vbs",
-		"ico" => "image/x-icon",
-		"png" => "image/png",
-		"jpg" => "image/jpeg",
-		"jpeg" => "image/jpeg",
-		"pdf" => "application/pdf",
-	);
-	$extension = pathinfo($file, PATHINFO_EXTENSION); // Get file extension
-	return $mimeTypes[$extension] ?? "text/plain"; // Chose mime type depending on file extension, default value "text/plain"
 }

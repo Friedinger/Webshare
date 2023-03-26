@@ -15,10 +15,11 @@
 			font-family: Verdana, sans-serif;
 			display: flex;
 			flex-direction: column;
-			min-height: calc(100% - 1rem);
+			height: 100%;
 			padding: 0.5rem;
 			margin: 0;
 			color-scheme: dark;
+			box-sizing: border-box;
 		}
 
 		header {
@@ -114,11 +115,17 @@
 			bottom: 5px;
 		}
 
-		iframe {
+		main {
 			order: 2;
 			flex-grow: 1;
+			max-height: calc(100% - 2.75rem);
+
+		}
+
+		main * {
 			width: 100%;
 			height: 100%;
+			object-fit: contain;
 			border: none;
 		}
 
@@ -155,7 +162,7 @@
 			<span id="copyLink">Copy Link</span>
 		</a>
 	</header>
-	<iframe src="?action=view" title="<?php print($shareFileName) ?>"></iframe>
+	<main><?php print($sharePreview) ?></main>
 </body>
 
 </html>
