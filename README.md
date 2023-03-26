@@ -99,10 +99,16 @@ A sample admin page can be found [here](/webshare/adminPage_sample.php).
 
 ### View page
 
-The view page must include an iframe to preview the shared file. Therefore, the source must be included with PHP.
+The view page should display an preview of the requested file. Therefore the following php code must be included to output the preview.
 
-```html
-<iframe src="?action=view" title="<?php print($shareFileName) ?>"></iframe>
+```php
+<?php print($sharePreview) ?>
+```
+
+To display the file name you can use this script:
+
+```php
+<?php print($shareFileName) ?>
 ```
 
 A sample view page can be found [here](/webshare/viewPage_sample.php).
