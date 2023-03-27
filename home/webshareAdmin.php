@@ -3,10 +3,7 @@
 require_once($_SERVER["DOCUMENT_ROOT"] . "/../webshare/webshareConfig.php");
 
 
-if (!WebshareConfig::adminPageAccess()) {
-	WebshareConfig::adminPageAccessFailed();
-	exit;
-}
+if (!WebshareConfig::adminPageAccess()) exit;
 
 if (!empty($_POST["submit"]) && WebshareConfig::adminPageAccess()) {
 	$status = addShare();

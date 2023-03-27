@@ -48,10 +48,11 @@ class WebshareConfig
 	}
 	public static function adminPageAccess()
 	{
-		return true; // Control authentication to protect admin page, return true if authenticated
-	}
-	public static function adminPageAccessFailed()
-	{
-		die("<h1>Forbidden</h1>No access to the requested page."); // Action if admin page was requested, but is not allowed
+		$login = true; // Just for development, should be set by login script
+		if ($login) {
+			return true; // Control authentication to protect admin page, return true if authenticated
+		}
+		echo "<h1>Forbidden</h1>No access to the requested page."; // Action if admin page was requested, but is not allowed
+		return false;
 	}
 }

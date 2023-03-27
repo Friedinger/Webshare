@@ -12,9 +12,7 @@ if (str_starts_with($request, "admin")) {
 	if (WebshareConfig::adminPageAccess()) {
 		header("Content-Type: text/html");
 		require("webshareAdmin.php");
-		exit;
 	}
-	WebshareConfig::adminPageAccessFailed();
 	exit;
 }
 
@@ -116,10 +114,7 @@ function passwordProtection($share)
 			return;
 		}
 		$status = "incorrect";
-		require(WebshareConfig::pathPasswordPage($status));
-		exit;
-	}
-	$status = "default";
+	} else $status = "default";
 	require(WebshareConfig::pathPasswordPage($status));
 	exit;
 }
@@ -139,6 +134,7 @@ function deletePage($share)
 
 function deleteShare($share)
 {
+	if (!WebshareConfig::adminPageAccess()) return;
 	if ($share["type"] == "file") unlink(WebshareConfig::pathStorage() . $share["uri"]);
 	$db = mysqli_connect(WebshareConfig::dbHost(), WebshareConfig::dbUsername(), WebshareConfig::dbPassword(), WebshareConfig::dbName());
 	$deleteShare = mysqli_prepare($db, "DELETE FROM " . WebshareConfig::dbTableWebshare() . " WHERE uri=?");
