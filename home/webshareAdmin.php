@@ -71,7 +71,7 @@ function listShares()
 		"expireDate" => "expireDate",
 		"createDate" => "createDate",
 	);
-	$shareSort = $sort[$_GET["sort"]] ?? "createDate" . " ASC";
+	$shareSort = $sort[$_GET["sort"] ?? "createDate"] ?? "createDate" . " ASC";
 
 	$db = mysqli_connect(WebshareConfig::dbHost(), WebshareConfig::dbUsername(), WebshareConfig::dbPassword(), WebshareConfig::dbName());
 	if (!$db) die("Database connection failed."); // Database connection error
