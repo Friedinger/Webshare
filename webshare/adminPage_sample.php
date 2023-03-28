@@ -163,12 +163,12 @@
 	<?php } ?>
 	<div class="shareList">
 		<table>
-			<th style="width: 50px;">URI</th>
-			<th style="width: 50px;">Type</th>
-			<th style="width: 300px;">Value</th>
-			<th style="width: 90px;">Password</th>
-			<th style="width: 180px;">Expire Date</th>
-			<th style="width: 180px;">Create Date</th>
+			<th style="width: 50px;"><a href="?sort=uri">URI</a></th>
+			<th style="width: 50px;"><a href="?sort=type">Type</a></th>
+			<th style="width: 300px;"><a href="?sort=value">Value</a></th>
+			<th style="width: 90px;"><a href="?sort=password">Password</a></th>
+			<th style="width: 180px;"><a href="?sort=expireDate">Expire Date</a></th>
+			<th style="width: 180px;"><a href="?sort=createDate">Create Date</a></th>
 			<th style="width: 60px;">Action</th>
 			<?php print($shareList) ?>
 		</table>

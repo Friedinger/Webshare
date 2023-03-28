@@ -81,16 +81,16 @@ if ($status[0] == "errorDefault") { ?>
 <?php } ?>
 ```
 
-To display the list of existing shares, a table must be added to the admin page. The php script outputs the table data.
+To display the list of existing shares, a table must be added to the admin page. The php script outputs the table data, the links allow sorting the table by the different rows.
 
 ```html
 <table>
-	<th>URI</th>
-	<th>Type</th>
-	<th>Value</th>
-	<th>Password</th>
-	<th>Expire Date</th>
-	<th>Create Date</th>
+	<th><a href="?sort=uri">URI</a></th>
+	<th><a href="?sort=type">Type</a></th>
+	<th><a href="?sort=value">Value</a></th>
+	<th><a href="?sort=password">Password</a></th>
+	<th><a href="?sort=expireDate">Expire Date</a></th>
+	<th><a href="?sort=createDate">Create Date</a></th>
 	<th>Action</th>
 	<?php print($shareList) ?>
 </table>

@@ -63,17 +63,26 @@ function addShare()
 // List shares in table
 function listShares()
 {
+	$sort = array(
+		"uri" => "uri",
+		"type" => "type",
+		"value" => "value",
+		"password" => "password",
+		"expireDate" => "expireDate",
+		"createDate" => "createDate",
+	);
+	$shareSort = $sort[$_GET["sort"]] ?? "createDate" . " ASC";
+
 	$db = mysqli_connect(WebshareConfig::dbHost(), WebshareConfig::dbUsername(), WebshareConfig::dbPassword(), WebshareConfig::dbName());
 	if (!$db) die("Database connection failed."); // Database connection error
-	$listShares = mysqli_prepare($db, "SELECT * FROM " . WebshareConfig::dbTableWebshare());
+	$listShares = mysqli_prepare($db, "SELECT * FROM " . WebshareConfig::dbTableWebshare() . " ORDER BY " . WebshareConfig::dbTableWebshare() . "." . $shareSort);
 	mysqli_stmt_execute($listShares);
 	$shares = mysqli_fetch_all(mysqli_stmt_get_result($listShares), MYSQLI_ASSOC);
 	$shareList = "";
 	foreach ($shares as $shareContent) {
-		$sharePassword = "";
 		if (!empty($shareContent["password"])) {
 			$sharePassword = "True";
-		}
+		} else $sharePassword = "";
 		$shareList .= "
 		<tr>
 			<td>" . linkToShare(htmlspecialchars($shareContent["uri"]), "short") . "</a></td>
