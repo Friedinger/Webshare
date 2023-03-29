@@ -16,14 +16,11 @@ function addShare()
 {
 	$db = mysqli_connect(WebshareConfig::dbHost(), WebshareConfig::dbUsername(), WebshareConfig::dbPassword(), WebshareConfig::dbName());
 	if (!$db) die("Database connection failed."); // Database connection error
-	$uri = mysqli_real_escape_string($db, htmlspecialchars($_POST["uri"]));
+	$uri = mysqli_real_escape_string($db, htmlspecialchars(preg_replace("/[^a-zA-Z0-9_-]/", "", $_POST["uri"])));
 	$expireDate = mysqli_real_escape_string($db, htmlspecialchars($_POST["expireDate"]));
 	$password = mysqli_real_escape_string($db, htmlspecialchars($_POST["password"]));
-	if (empty($password)) {
-		$password = null;
-	} else {
-		$password = password_hash($password, PASSWORD_DEFAULT); // Hash password
-	}
+	if (empty($password)) $password = null;
+	else $password = password_hash($password, PASSWORD_DEFAULT); // Hash password
 	if (empty($expireDate)) $expireDate = null;
 	if ($_FILES["file"]["name"] && !empty($_POST["link"])) return "errorBoth";
 	// Add file
@@ -47,7 +44,7 @@ function addShare()
 		if (!preg_match("/^https?:\/\//", $value)) $value = "https://" . $value;
 	}
 	// Add share to database
-	if ($type) {
+	if (!empty($type)) {
 		$addShare = mysqli_prepare($db, "INSERT IGNORE INTO " . WebshareConfig::dbTableWebshare() . " (uri, type, value, password, expireDate) VALUES (?, ?, ?, ?, ?)");
 		mysqli_stmt_bind_param($addShare, "sssss", $uri, $type, $value, $password, $expireDate);
 		mysqli_stmt_execute($addShare);

@@ -139,7 +139,7 @@
 	<h1>Webshare Admin</h1>
 	Add a new webshare. Either a file share (then upload a file) or a link (then enter a link).
 	<form method="post" enctype="multipart/form-data">
-		<label>URI: </label><input type="text" name="uri" required><br>
+		<label>URI: </label><input type="text" name="uri" pattern="[a-zA-Z0-9_-]+" required><br>
 		<label>File: </label><input type="file" name="file"><br>
 		<label>Link: </label><input type="url" name="link"><br>
 		<label>Expire Date: </label><input type="datetime-local" name="expireDate" min="<?php echo date('Y-m-d\TH:i'); ?>"><br>
