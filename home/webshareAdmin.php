@@ -61,14 +61,14 @@ function addShare()
 function listShares()
 {
 	$sort = array(
-		"uri" => "uri",
-		"type" => "type",
-		"value" => "value",
-		"password" => "password",
-		"expireDate" => "expireDate",
-		"createDate" => "createDate",
+		"uri" => "uri ASC",
+		"type" => "type ASC",
+		"value" => "value ASC",
+		"password" => "password DESC",
+		"expireDate" => "expireDate DESC",
+		"createDate" => "createDate DESC",
 	);
-	$shareSort = $sort[$_GET["sort"] ?? "createDate"] ?? "createDate" . " ASC";
+	$shareSort = $sort[$_GET["sort"] ?? "createDate"] ?? "createDate DESC";
 
 	$db = mysqli_connect(WebshareConfig::dbHost(), WebshareConfig::dbUsername(), WebshareConfig::dbPassword(), WebshareConfig::dbName());
 	if (!$db) die("Database connection failed."); // Database connection error
