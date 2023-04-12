@@ -115,7 +115,8 @@ function passwordProtection($share)
 		}
 		$status = "incorrect";
 	} else $status = "default";
-	require(WebshareConfig::pathPasswordPage($status));
+	$uri = $share["uri"];
+	require(WebshareConfig::pathPasswordPage($uri, $status));
 	exit;
 }
 

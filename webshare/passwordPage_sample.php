@@ -2,7 +2,7 @@
 <html lang="en">
 
 <head>
-	<title>Webshare | Password Protected</title>
+	<title>Password | <?php print($uri) ?></title>
 	<meta name='viewport' content='width=device-width, initial-scale=1.0'>
 	<style>
 		body {
@@ -64,7 +64,7 @@
 </head>
 
 <body>
-	<h2>This share is password protected</h2>
+	<h2>The share <i><?php print($uri) ?></i> is password protected</h2>
 	<form method="post">
 		<label>Password: </label><input type="password" name="password"><br>
 		<input type="submit" value="Submit password" name="submit"><br>

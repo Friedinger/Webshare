@@ -14,7 +14,7 @@ class WebshareConfig
 	{
 		return $_SERVER["DOCUMENT_ROOT"] . "/../webshare/viewPage_sample.php"; // Path to view page which displays a preview of requested file
 	}
-	public static function pathPasswordPage($status)
+	public static function pathPasswordPage($uri, $status)
 	{
 		return $_SERVER["DOCUMENT_ROOT"] . "/../webshare/passwordPage_sample.php"; // Path to password page for protected shares
 	}
