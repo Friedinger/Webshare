@@ -40,7 +40,7 @@ function addShare()
 	// Add link
 	if ($_POST["link"]) {
 		$type = "link";
-		$value = mysqli_real_escape_string($db, $_POST["link"]);
+		$value = mysqli_real_escape_string($db, urldecode($_POST["link"]));
 		if (!preg_match("/^https?:\/\//", $value)) $value = "https://" . $value;
 	}
 	// Add share to database
