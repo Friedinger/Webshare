@@ -4,7 +4,7 @@ require_once($_SERVER["DOCUMENT_ROOT"] . "/../webshare/webshareConfig.php");
 
 // Get request and exempt admin page
 $installPath = str_replace("\\", "", dirname($_SERVER["PHP_SELF"]) . "/");
-$request = htmlspecialchars(strtolower($_SERVER["REQUEST_URI"])); // Remove special chars from request
+$request = htmlspecialchars(strtolower(urldecode($_SERVER["REQUEST_URI"]))); // Remove special chars from request
 $request = str_replace($installPath, "", $request); // Remove install path from request
 $request = explode("?", $request)[0]; // Remove parameters
 $request = rtrim($request, "/"); // Remove trailing slash
@@ -72,7 +72,6 @@ function redirectFile($share)
 			readfile($file);
 			exit;
 		} elseif ($_GET["action"] == "download") {
-
 			header("Content-Disposition: attachment; filename=" . $share["value"]);
 			header("Content-Type: " . mime_content_type($file));
 			header("Content-Length: " . filesize($file));

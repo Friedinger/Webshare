@@ -16,7 +16,7 @@ function addShare()
 {
 	$db = mysqli_connect(WebshareConfig::dbHost(), WebshareConfig::dbUsername(), WebshareConfig::dbPassword(), WebshareConfig::dbName());
 	if (!$db) die("Database connection failed."); // Database connection error
-	$uri = mysqli_real_escape_string($db, htmlspecialchars(preg_replace("/[^a-zA-Z0-9_-]/", "", $_POST["uri"])));
+	$uri = mysqli_real_escape_string($db, htmlspecialchars(preg_replace("/[^a-z0-9_-]/", "", strtolower($_POST["uri"]))));
 	$expireDate = mysqli_real_escape_string($db, htmlspecialchars($_POST["expireDate"]));
 	$password = mysqli_real_escape_string($db, htmlspecialchars($_POST["password"]));
 	if (empty($password)) $password = null;
