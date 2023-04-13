@@ -50,7 +50,7 @@ The admin page must offer a form to add a share which consists of the following 
 
 ```html
 <form method="post" enctype="multipart/form-data">
-	<input type="text" name="uri" pattern="[a-zA-Z0-9_-]+" required /><br />
+	<input type="text" name="uri" pattern="[a-z0-9_-]+" required /><br />
 	<input type="file" name="file" /><br />
 	<input type="url" name="link" /><br />
 	<input type="text" name="password" /><br />
