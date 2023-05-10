@@ -1,7 +1,15 @@
 <?php
+
+namespace Friedinger\Webshare;
+
 if (!isset($_SESSION)) session_start();
-class WebshareConfig
+class Config
 {
+	public static function loadWebshare()
+	{
+		require_once($_SERVER["DOCUMENT_ROOT"] . "/../webshare/webshare.php");
+		$webshare = new Webshare();
+	}
 	public static function pathStorage()
 	{
 		return $_SERVER["DOCUMENT_ROOT"] . "/../webshare/files/"; // Path to file storage, relativ from document root. Important: Trailing slash at the end
