@@ -23,7 +23,10 @@ final class Pages
 	}
 	public function adminPage(): bool
 	{
-		if (!Config::adminPageAccess()) return false;
+		if (!Config::adminAccess()) {
+			Config::noAdminAccess();
+			return true;
+		}
 		if ($this->request->post("submit")) {
 			Output::$status = $this->share->addShare($this->request);
 			$this->outputShareInfo();
@@ -67,10 +70,9 @@ final class Pages
 	}
 	public function deletePage(): bool
 	{
-		if (!Config::adminPageAccess()) return false;
+		if (!Config::adminAccess()) return false;
 		if ($this->request->post("deleteShare")) {
-			Output::$status = "success";
-			$this->share->deleteShare();
+			Output::$status = $this->share->deleteShare();
 		}
 		$this->loadPage("delete");
 		return true;
@@ -91,7 +93,7 @@ final class Pages
 				$path = Config::PATH_VIEW;
 				break;
 			case "password":
-				$path = Config::pathPasswordPage;
+				$path = Config::PATH_PASSWORD;
 				break;
 			case "delete":
 				$path = Config::PATH_DELETE;

@@ -44,7 +44,7 @@ final class Request
 	}
 	public function file(string ...$keys): mixed
 	{
-		$file = $this->session;
+		$file = $this->file;
 		foreach ($keys as $key) {
 			if (!isset($file[$key])) return null;
 			$file = $file[$key];

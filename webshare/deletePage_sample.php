@@ -62,6 +62,8 @@
 	<h1>Webshare Delete</h1>
 	<?php if (Friedinger\Webshare\Output::$status == "success") { ?>
 		<p>Share successfully deleted.</p>
+	<?php } elseif (Friedinger\Webshare\Output::$status == "error") { ?>
+		<p>Share deleting failed. Please contact webmaster.</p>
 	<?php } else { ?>
 		<p>Do you really want to delete the share <i><?= Friedinger\Webshare\Output::$uri ?></i>?</p>
 		<form method="post">

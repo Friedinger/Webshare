@@ -7,7 +7,7 @@ A simple, lightweight, self hosted webservice to easily share files and links vi
 
 by Friedinger (friedinger.org)
 
-Version: 2.0-beta2
+Version: 2.0
 
 */
 
@@ -31,13 +31,14 @@ class Config
 	const DB_PASSWORD = "Database password"; // Mysql database password
 	const DB_NAME = "Database name"; // Mysql database name
 	const DB_TABLE = "webshare"; // Mysql database table to store webshare data
-	public static function adminPageAccess()
+	public static function adminAccess(): bool
 	{
-		$login = true; // Just for development, should be set by login script
-		if ($login) {
-			return true; // Control authentication to protect admin page, return true if authenticated
-		}
-		echo "<h1>Forbidden</h1>No access to the requested page."; // Action if admin page was requested, but is not allowed
-		return false;
+		// Control authentication to protect admin page, return true if authenticated
+		return true; // Just for development, should be set by login script
+	}
+	public static function noAdminAccess(): void
+	{
+		// Action if admin page was requested, but is not allowed
+		echo "<h1>Forbidden</h1>No access to the requested page.";
 	}
 }

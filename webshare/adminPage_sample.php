@@ -141,7 +141,7 @@
 	<form method="post" enctype="multipart/form-data">
 		<label>URI: </label><input type="text" name="uri" pattern="[a-z0-9_-]+" required><br>
 		<label>File: </label><input type="file" name="file"><br>
-		<label>Link: </label><input type="url" name="link"><br>
+		<label>Link: </label><input type="text" name="link"><br>
 		<label>Expire Date: </label><input type="datetime-local" name="expireDate" min="<?= date('Y-m-d\TH:i'); ?>"><br>
 		<label>Password: </label><input type="text" name="password"><br>
 		<input type="submit" value="Add share" name="submit"><br>
@@ -160,8 +160,8 @@
 		case "errorUploadSize":
 			print("<p>Share adding failed: File size limit exceeded.</p>");
 			break;
-		case "errorDefault":
-			print("<p>Share adding failed.</p>");
+		case "error":
+			print("<p>Share adding failed. Please contact webmaster.</p>");
 			break;
 		default:
 			break;

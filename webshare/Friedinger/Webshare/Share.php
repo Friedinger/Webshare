@@ -42,17 +42,17 @@ final class Share
 				case 0:
 					$this->type = "file";
 					$this->value = mysqli_real_escape_string($db, htmlspecialchars($fileUpload["name"]));
-					move_uploaded_file($fileUpload["tmp_name"], Config::PATH_STORAGE . $this->uri);
+					move_uploaded_file($fileUpload["tmp_name"], $this->pathFile());
 					return $this->addShareToDatabase($db);
 				case 1:
 					return "errorUploadSize";
 				default:
-					return "errorDefault";
+					return "error";
 			}
 		}
 		mysqli_close($db);
 		if (!empty($request->post("link")) && !empty($request->file("file", "size"))) return "errorBoth";
-		return "errorDefault";
+		return "error";
 	}
 	private function addShareToDatabase(\Mysqli $db): string
 	{
@@ -79,7 +79,7 @@ final class Share
 		$this->password = $share["password"];
 		$this->expireDate = $share["expireDate"];
 		$this->createDate = $share["createDate"];
-		if ($this->type == "file") $this->file = $_SERVER["DOCUMENT_ROOT"] . Config::PATH_STORAGE . $this->uri;
+		if ($this->type == "file") $this->file = $this->pathFile();
 		if (isset($this->expireDate) && strtotime($this->expireDate) < time()) {
 			$this->deleteShare();
 			return false;
@@ -147,25 +147,29 @@ final class Share
 		}
 		return $shareList;
 	}
-	public function deleteShare(): bool
+	public function deleteShare(): string
 	{
-		if (!Config::adminPageAccess()) return false;
+		if (!Config::adminPageAccess()) return "error";
 		if ($this->type == "file") {
-			$fileDelete = unlink(Config::PATH_STORAGE() . $this->uri);
-			if (!$fileDelete) return false;
+			if (!file_exists($this->pathFile())) return "error";
+			unlink($this->pathFile());
 		}
 		$db = $this->database();
 		$deleteShare = mysqli_prepare($db, "DELETE FROM " . Config::DB_TABLE . " WHERE uri=?");
 		mysqli_stmt_bind_param($deleteShare, "s", $this->uri);
-		$dbDelete = mysqli_stmt_execute($deleteShare);
+		mysqli_stmt_execute($deleteShare);
 		mysqli_close($db);
-		if (!$dbDelete) return false;
-		return true;
+		if (mysqli_stmt_affected_rows($deleteShare)) return "success";
+		return "error";
 	}
 	private function database(): \mysqli|false
 	{
 		$db = mysqli_connect(Config::DB_HOST, Config::DB_USERNAME, Config::DB_PASSWORD, config::DB_NAME);
 		if (!$db) die("Database connection failed.");
 		return $db;
+	}
+	private function pathFile(): string
+	{
+		return $_SERVER["DOCUMENT_ROOT"] . Config::PATH_STORAGE . $this->uri;
 	}
 }
