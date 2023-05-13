@@ -85,19 +85,19 @@ final class Pages
 	{
 		switch ($page) {
 			case "admin":
-				$path = Config::pathAdminPage;
+				$path = Config::PATH_ADMIN;
 				break;
 			case "view":
-				$path = Config::pathViewPage;
+				$path = Config::PATH_VIEW;
 				break;
 			case "password":
 				$path = Config::pathPasswordPage;
 				break;
 			case "delete":
-				$path = Config::pathDeletePage;
+				$path = Config::PATH_DELETE;
 				break;
 			case "error404":
-				$path = Config::path404Page;
+				$path = Config::PATH_404;
 				break;
 			default:
 				return false;

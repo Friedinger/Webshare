@@ -42,7 +42,7 @@ final class Share
 				case 0:
 					$this->type = "file";
 					$this->value = mysqli_real_escape_string($db, htmlspecialchars($fileUpload["name"]));
-					move_uploaded_file($fileUpload["tmp_name"], Config::pathStorage . $this->uri);
+					move_uploaded_file($fileUpload["tmp_name"], Config::PATH_STORAGE . $this->uri);
 					return $this->addShareToDatabase($db);
 				case 1:
 					return "errorUploadSize";
@@ -56,7 +56,7 @@ final class Share
 	}
 	private function addShareToDatabase(\Mysqli $db): string
 	{
-		$addShare = mysqli_prepare($db, "INSERT IGNORE INTO " . Config::dbTableWebshare . " (uri, type, value, password, expireDate) VALUES (?, ?, ?, ?, ?)");
+		$addShare = mysqli_prepare($db, "INSERT IGNORE INTO " . Config::DB_TABLE . " (uri, type, value, password, expireDate) VALUES (?, ?, ?, ?, ?)");
 		mysqli_stmt_bind_param($addShare, "sssss", $this->uri, $this->type, $this->value, $this->password, $this->expireDate);
 		mysqli_stmt_execute($addShare);
 		mysqli_close($db);
@@ -67,7 +67,7 @@ final class Share
 	{
 		$db = $this->database();
 		$uri = mysqli_real_escape_string($db, $uri);
-		$getShare = mysqli_prepare($db, "SELECT * FROM " . Config::dbTableWebshare . " WHERE uri=? LIMIT 1");
+		$getShare = mysqli_prepare($db, "SELECT * FROM " . Config::DB_TABLE . " WHERE uri=? LIMIT 1");
 		mysqli_stmt_bind_param($getShare, "s", $uri);
 		mysqli_stmt_execute($getShare);
 		$share = mysqli_fetch_assoc(mysqli_stmt_get_result($getShare));
@@ -79,7 +79,7 @@ final class Share
 		$this->password = $share["password"];
 		$this->expireDate = $share["expireDate"];
 		$this->createDate = $share["createDate"];
-		if ($this->type == "file") $this->file = $_SERVER["DOCUMENT_ROOT"] . Config::pathStorage . $this->uri;
+		if ($this->type == "file") $this->file = $_SERVER["DOCUMENT_ROOT"] . Config::PATH_STORAGE . $this->uri;
 		if (isset($this->expireDate) && strtotime($this->expireDate) < time()) {
 			$this->deleteShare();
 			return false;
@@ -125,7 +125,7 @@ final class Share
 		);
 		$shareSort = $sortOptions[$sort];
 		$db = $this->database();
-		$listShares = mysqli_prepare($db, "SELECT * FROM " . Config::dbTableWebshare . " ORDER BY " . Config::dbTableWebshare . "." . $shareSort);
+		$listShares = mysqli_prepare($db, "SELECT * FROM " . Config::DB_TABLE . " ORDER BY " . Config::DB_TABLE . "." . $shareSort);
 		mysqli_stmt_execute($listShares);
 		$shares = mysqli_fetch_all(mysqli_stmt_get_result($listShares), MYSQLI_ASSOC);
 		$shareList = "";
@@ -151,11 +151,11 @@ final class Share
 	{
 		if (!Config::adminPageAccess()) return false;
 		if ($this->type == "file") {
-			$fileDelete = unlink(Config::pathStorage() . $this->uri);
+			$fileDelete = unlink(Config::PATH_STORAGE() . $this->uri);
 			if (!$fileDelete) return false;
 		}
 		$db = $this->database();
-		$deleteShare = mysqli_prepare($db, "DELETE FROM " . Config::dbTableWebshare . " WHERE uri=?");
+		$deleteShare = mysqli_prepare($db, "DELETE FROM " . Config::DB_TABLE . " WHERE uri=?");
 		mysqli_stmt_bind_param($deleteShare, "s", $this->uri);
 		$dbDelete = mysqli_stmt_execute($deleteShare);
 		mysqli_close($db);
@@ -164,7 +164,7 @@ final class Share
 	}
 	private function database(): \mysqli|false
 	{
-		$db = mysqli_connect(Config::dbHost, Config::dbUsername, Config::dbPassword, config::dbName);
+		$db = mysqli_connect(Config::DB_HOST, Config::DB_USERNAME, Config::DB_PASSWORD, config::DB_NAME);
 		if (!$db) die("Database connection failed.");
 		return $db;
 	}
