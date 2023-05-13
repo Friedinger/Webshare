@@ -142,25 +142,31 @@
 		<label>URI: </label><input type="text" name="uri" pattern="[a-z0-9_-]+" required><br>
 		<label>File: </label><input type="file" name="file"><br>
 		<label>Link: </label><input type="url" name="link"><br>
-		<label>Expire Date: </label><input type="datetime-local" name="expireDate" min="<?php echo date('Y-m-d\TH:i'); ?>"><br>
+		<label>Expire Date: </label><input type="datetime-local" name="expireDate" min="<?= date('Y-m-d\TH:i'); ?>"><br>
 		<label>Password: </label><input type="text" name="password"><br>
 		<input type="submit" value="Add share" name="submit"><br>
 	</form>
-	<?php if ($status[0] == "success") { ?>
-		<p>Share added successfully: <?php print($status[1]) ?></p>
-	<?php }
-	if ($status[0] == "errorBoth") { ?>
-		<p>Share adding failed: File and link offered, please only choose one.</p>
-	<?php }
-	if ($status[0] == "errorUri") { ?>
-		<p>Share adding failed: URI invalid, please chose a different one.</p>
-	<?php }
-	if ($status[0] == "errorUploadSize") { ?>
-		<p>Share adding failed: File size limit exceeded.</p>
-	<?php }
-	if ($status[0] == "errorDefault") { ?>
-		<p>Share adding failed.</p>
-	<?php } ?>
+	<?php
+	switch (Friedinger\Webshare\Output::$status) {
+		case "success":
+			print("<p>Share added successfully: " . Friedinger\Webshare\Output::link(null, null, true) . "</p>");
+			break;
+		case "errorUri":
+			print("<p>Share adding failed: File and link offered, please only choose one.</p>");
+			break;
+		case "errorBoth":
+			print("<p>Share adding failed: File and link offered, please only choose one.</p>");
+			break;
+		case "errorUploadSize":
+			print("<p>Share adding failed: File size limit exceeded.</p>");
+			break;
+		case "errorDefault":
+			print("<p>Share adding failed.</p>");
+			break;
+		default:
+			break;
+	}
+	?>
 	<div class="shareList">
 		<table>
 			<th style="width: 50px;"><a href="?sort=uri">URI</a></th>
@@ -170,7 +176,7 @@
 			<th style="width: 180px;"><a href="?sort=expireDate">Expire Date</a></th>
 			<th style="width: 180px;"><a href="?sort=createDate">Create Date</a></th>
 			<th style="width: 60px;">Action</th>
-			<?php print($shareList) ?>
+			<?= Friedinger\Webshare\Output::$shareList ?>
 		</table>
 	</div>
 </body>

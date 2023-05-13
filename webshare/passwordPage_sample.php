@@ -2,7 +2,7 @@
 <html lang="en">
 
 <head>
-	<title>Password | <?php print($uri) ?></title>
+	<title>Password | <?= Friedinger\Webshare\Output::$uri ?></title>
 	<meta name='viewport' content='width=device-width, initial-scale=1.0'>
 	<style>
 		body {
@@ -64,12 +64,12 @@
 </head>
 
 <body>
-	<h2>The share <i><?php print($uri) ?></i> is password protected</h2>
+	<h2>The share <i><?= Friedinger\Webshare\Output::$uri ?></i> is password protected</h2>
 	<form method="post">
 		<label>Password: </label><input type="password" name="password"><br>
 		<input type="submit" value="Submit password" name="submit"><br>
 	</form>
-	<?php if ($status == "incorrect") { ?>
+	<?php if (Friedinger\Webshare\Output::$status == "incorrect") { ?>
 		<p>The entered password is incorrect, please try again.</p>
 	<?php } else { ?>
 		<p>Please enter the password to access the share.</p>
