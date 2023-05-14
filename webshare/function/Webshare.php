@@ -13,6 +13,11 @@ Version: 2.0
 
 namespace Friedinger\Webshare;
 
+require_once("Request.php");
+require_once("Share.php");
+require_once("Pages.php");
+require_once("Output.php");
+
 final class Webshare
 {
 	public function __construct()
