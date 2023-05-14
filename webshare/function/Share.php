@@ -149,7 +149,7 @@ final class Share
 	}
 	public function deleteShare(): string
 	{
-		if (!Config::adminPageAccess()) return "error";
+		if (!Config::adminAccess()) return "error";
 		if ($this->type == "file") {
 			if (!file_exists($this->pathFile())) return "error";
 			unlink($this->pathFile());
