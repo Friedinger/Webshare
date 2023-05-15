@@ -31,7 +31,7 @@ class Config
 	const DB_PASSWORD = "Database password"; // Mysql database password
 	const DB_NAME = "Database name"; // Mysql database name
 	const DB_TABLE = "webshare"; // Mysql database table to store webshare data
-	public static function error404()
+	public static function error404(): void
 	{
 		// Action if requested share doesn't exist
 		header("HTTP/1.0 404 Not Found");
