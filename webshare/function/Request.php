@@ -13,7 +13,6 @@ namespace Friedinger\Webshare;
 
 final class Request
 {
-	public string $installPath;
 	private string $uri;
 	private array $get;
 	private array $post;
@@ -21,7 +20,6 @@ final class Request
 	private array $session;
 	public function __construct(string $requestUri)
 	{
-		$this->installPath = str_replace("\\", "", dirname($_SERVER["PHP_SELF"]) . "/");
 		$this->uri = $this->prepareRequest($requestUri);
 		$this->get = $_GET;
 		$this->post = $_POST;
@@ -73,7 +71,7 @@ final class Request
 	private function prepareRequest(string $requestUri): string
 	{
 		$request = htmlspecialchars(strtolower(urldecode($requestUri))); // Remove special chars from request
-		$request = str_replace($this->installPath, "", $request); // Remove install path from request
+		$request = str_replace(Config::INSTALL_PATH, "", $request); // Remove install path from request
 		$request = explode("?", $request)[0]; // Remove parameters
 		$request = rtrim($request, "/"); // Remove trailing slash
 		return $request;

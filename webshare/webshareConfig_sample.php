@@ -20,6 +20,7 @@ spl_autoload_register(function ($className) {
 if (!isset($_SESSION)) session_start();
 class Config
 {
+	const INSTALL_PATH = "/"; // Set the path in which the index.php file is located or at which uri it's content is executed. Must start and end with a slash
 	const PATH_STORAGE = "/../webshare/files/"; // Path to file storage, relativ from document root. Important: Trailing slash at the end
 	const PATH_ADMIN = "/../webshare/adminPage_sample.php"; // Path to admin page which offers form to add shares
 	const PATH_VIEW = "/../webshare/viewPage_sample.php"; // Path to view page which displays a preview of requested file

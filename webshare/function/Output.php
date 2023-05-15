@@ -24,7 +24,7 @@ final class Output
 	{
 		$uri = $uri ?? self::$uri;
 		if ($uri == null) return null;
-		return $_SERVER["HTTP_HOST"] . Request::installPath() . $uri;
+		return $_SERVER["HTTP_HOST"] . Config::INSTALL_PATH . $uri;
 	}
 	public static function link(string $uri = null, string|null $text = null, bool $longLink = false): string
 	{
