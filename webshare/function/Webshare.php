@@ -24,10 +24,7 @@ final class Webshare
 	{
 		$request = new Request($_SERVER["REQUEST_URI"]);
 		$handle = $this->handleRequest($request);
-		if (!$handle) {
-			$page = new Pages($request);
-			$page->error404Page();
-		}
+		if (!$handle) Config::error404();
 	}
 	private function handleRequest(Request $request)
 	{

@@ -77,12 +77,6 @@ final class Pages
 		$this->loadPage("delete");
 		return true;
 	}
-	public function error404Page(): bool
-	{
-		header("HTTP/1.0 404 Not Found");
-		$this->loadPage("error404");
-		return true;
-	}
 	private function loadPage(string $page): bool
 	{
 		switch ($page) {
@@ -97,9 +91,6 @@ final class Pages
 				break;
 			case "delete":
 				$path = Config::PATH_DELETE;
-				break;
-			case "error404":
-				$path = Config::PATH_404;
 				break;
 			default:
 				return false;
