@@ -64,10 +64,6 @@ final class Request
 		$this->session[$key] = $value;
 		return $_SESSION[$key] == $value;
 	}
-	public static function installPath(): string
-	{
-		return str_replace("\\", "", dirname($_SERVER["PHP_SELF"]) . "/");
-	}
 	private function prepareRequest(string $requestUri): string
 	{
 		$request = htmlspecialchars(strtolower(urldecode($requestUri))); // Remove special chars from request
