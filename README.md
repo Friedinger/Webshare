@@ -2,6 +2,8 @@
 
 Webshare: A simple, lightweight, self hosted webservice to easily share files and links via an short custom URL.
 
+Version 2.0
+
 ## Features
 
 -   Share files with an easy to remember, custom URL
@@ -17,8 +19,8 @@ Webshare: A simple, lightweight, self hosted webservice to easily share files an
 1. Download the source code from the [latest release](https://github.com/Friedinger/Webshare/releases/latest).
 2. Unzip the files and upload them to your webserver.
 3. Move the file to the correct location:
-    - The files in the _home_ directory must be inside the **root directory** of the webserver. They can be moved into a subdirectory.
-    - The _webshare_ directory must be **in the parent directory** of the root directory of the webserver.
+    - The files in the _home_ directory must be **inside the root directory** of the webserver. They can be moved into a subdirectory and the content of the _index.php_ file can also be executed by another custom file for advanced usage. The _.htaccess_ file just redirects all requests to the _index.php_ file.
+    - The _webshare_ directory must be **outside directory** of the root directory of the webserver to prevent direct access. You can move the files to your own destination, only the files inside the _function_ directory should remain together in one directory.
 4. Create MySQL table for Webshare:
 
     It should have the following structure:
@@ -33,16 +35,30 @@ Webshare: A simple, lightweight, self hosted webservice to easily share files an
 
     Make _uri_ a primary key index to ensure unique short links.
 
-5. Adjust config file:
+5. Adjust the _index.php_ file: Set the require paths to the _Webshare.php_ and _webshareConfig.php_ files so that they get loaded properly.
+6. Adjust config file:
+    - Set the webshare install path when you moved the _index.php_ file into a subdirectory of root directory.
     - Set path to file storage.
-    - Set path to _admin_, _view_ and _error 404_ page.
-    - Set the database login information (_hostname_, _username_, _password_, _database name_ and _table name_ for Webshare).
+    - Set path to _admin_, _view_, _password_ and _delete_ page.
+    - Set the database login information for Webshare.
+    - Change the action executed on an error 404.
     - Limit access to admin page by validating the login state (recommended) or use an authentication with an _.htaccess_ file.
     - Change action if admin page was requested but user is not authenticated.
 
 ## Customization
 
-Inside the Webshare folder you can customize your Webshare installation to your personal design by replacing or modifying the default sample pages. There are just some elements the pages must offer:
+To customize your Webshare installation to your personal design, you can replace or modify the default sample pages provided in the _webshare_ directory. There are just some elements the pages must offer.
+
+### General outputs
+
+The `Friedinger\Webshare\Output` object provides a variety of information about the current share:
+
+-   `Friedinger\Webshare\Output::$uri`: The uri of the share
+-   `Friedinger\Webshare\Output::$value`: The value of the share, either the link or the filename. Should not be used in password page, because it provides information without entering the password.
+-   `Friedinger\Webshare\Output::$expireDate`: The timestamp when the share will expire
+-   `Friedinger\Webshare\Output::$createDate`: The timestamp of the share creation time
+-   `Friedinger\Webshare\Output::$status`: Status information about the current share action, can only be used on some pages.
+-   `Friedinger\Webshare\Output::link($uri, $text, $longLink)`: Function to output a link to an URI in webshare, for example the admin page. _$uri_ sets the URI to link to, _$text_ adjusts the text that is visible (default is the link itself), $longLink controls wether the link should just be the URI / text or an complete link with hostname and option to copy it.
 
 ### Admin page
 
@@ -52,36 +68,23 @@ The admin page must offer a form to add a share which consists of the following 
 <form method="post" enctype="multipart/form-data">
 	<input type="text" name="uri" pattern="[a-z0-9_-]+" required /><br />
 	<input type="file" name="file" /><br />
-	<input type="url" name="link" /><br />
+	<input type="text" name="link" /><br />
 	<input type="text" name="password" /><br />
 	<input type="datetime-local" name="expireDate" /><br />
 	<input type="submit" name="submit" /><br />
 </form>
 ```
 
-The following PHP code should also be included to display messages after attempting to add the share.
+To display messages after attempting to add a share you can use the status provided with php in the `Friedinger\Webshare\Output::$status` variable.
+It can have the following values, check out sample admin page for an example of handling these values:
 
-```php
-<?php
-if ($status[0] == "success") { ?>
-	// Success message, add the php line below to output a link and a copy icon to the share.
-	<?php print($status[1]) ?>
-<?php }
-if ($status[0] == "errorBoth") { ?>
-	// Message if share adding failed due to a provision of file and link input at the same time.
-<?php }
-if ($status[0] == "errorUri") { ?>
-	// Message if share adding failed because the entered URI is already in use.
-<?php }
-if ($status[0] == "errorUploadSize") { ?>
-	// Message if share adding failed due to an excess of the upload size.
-<?php }
-if ($status[0] == "errorDefault") { ?>
-	// Message if share adding failed for another reason.
-<?php } ?>
-```
+-   `success`: The share was successfully added
+-   `errorUri`: Share adding failed because the uri is already in use
+-   `errorBoth`: Share adding failed because file and link were offered and not just one of them
+-   `errorUploadSize`: Share adding failed because upload size limit was exceeded
+-   `error`: Share adding failed for another reason
 
-To display the list of existing shares, a table must be added to the admin page. The php script outputs the table data, the links allow sorting the table by the different columns.
+To display the list of existing shares, a table must be added to the admin page. The output object and its variable _$shareList_ output the table data, the links allow sorting the table by the different columns.
 
 ```html
 <table>
@@ -92,7 +95,7 @@ To display the list of existing shares, a table must be added to the admin page.
 	<th><a href="?sort=expireDate">Expire Date</a></th>
 	<th><a href="?sort=createDate">Create Date</a></th>
 	<th>Action</th>
-	<?php print($shareList) ?>
+	<?= Friedinger\Webshare\Output::$shareList ?>
 </table>
 ```
 
@@ -103,13 +106,7 @@ A sample admin page can be found [here](/webshare/adminPage_sample.php).
 The view page should display an preview of the requested file. Therefore the following php code must be included to output the preview.
 
 ```php
-<?php print($sharePreview) ?>
-```
-
-To display the file name you can use this script:
-
-```php
-<?php print($shareFileName) ?>
+<?= Friedinger\Webshare\Output::$sharePreview ?>
 ```
 
 A sample view page can be found [here](/webshare/viewPage_sample.php).
@@ -125,15 +122,7 @@ The password page must contain a form to enter the password to access the protec
 </form>
 ```
 
-Furthermore, the following PHP code should be included to display messages, for example if the entered password is incorrect.
-
-```php
-<?php if ($status == "incorrect") { ?>
-	// Message if the password is incorrect
-<?php } else { ?>
-	// Default message that requests the user to enter the password
-<?php } ?>
-```
+The status of the password access is provided by the `Friedinger\Webshare\Output::$status` variable. Its value is set to `incorrect` if the entered password is not correct. If the password matches the user is directly redirected to the share without displaying any message.
 
 A sample password page can be found [here](/webshare/passwordPage_sample.php).
 
@@ -143,26 +132,21 @@ The delete page must include a form to confirm the deletion of a share. For that
 
 ```html
 <form method="post">
-	<input type="hidden" name="share" value="<?php print($uri) ?>" />
+	<input
+		type="hidden"
+		name="share"
+		value="<?= Friedinger\Webshare\Output::$uri ?>" />
 	<input type="submit" name="submit" value="Delete" /><br />
 </form>
 ```
 
-To inform the user about a successful deletion, a messages can be printed after checking the deletion status with this PHP code:
+To inform the user about a successful deletion, the status of the deletion is provided by the `Friedinger\Webshare\Output::$status` variable. It can have the following values:
 
-```php
-<?php if ($status == "success") { ?>
-	// Success message in HTML
-<?php } else { ?>
-	// Form from above
-<?php } ?>
-```
+-   `success`: The share was successfully deleted
+-   `error`: An error occurred during the deletion
+-   Something else or unset: Default output before confirming the deletion
 
-### Error 404 page
-
-The error 404 page has no required parts but it should inform the user that an error 404 occurred.
-
-A sample error 404 page can be found [here](/webshare/404Page_sample.php).
+A sample password page can be found [here](/webshare/deletePage_sample.php).
 
 ## Credit and license
 
