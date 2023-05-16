@@ -152,7 +152,7 @@
 			print("<p>Share added successfully: " . Friedinger\Webshare\Output::link(null, null, true) . "</p>");
 			break;
 		case "errorUri":
-			print("<p>Share adding failed: File and link offered, please only choose one.</p>");
+			print("<p>Share adding failed: The entered uri is invalid, please try another one.</p>");
 			break;
 		case "errorBoth":
 			print("<p>Share adding failed: File and link offered, please only choose one.</p>");
