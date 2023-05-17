@@ -27,8 +27,8 @@ final class Share
 		$this->expireDate = mysqli_real_escape_string($db, htmlspecialchars($request->post("expireDate")));
 		if (empty($this->expireDate)) $this->expireDate = null;
 		$this->password = mysqli_real_escape_string($db, htmlspecialchars($request->post("password")));
-		if (!empty($password)) {
-			$this->password = password_hash($password, PASSWORD_DEFAULT);
+		if (!empty($this->password)) {
+			$this->password = password_hash($this->password, PASSWORD_DEFAULT);
 		} else $this->password = null;
 		if (!empty($request->post("link")) && empty($request->file("file", "size"))) {
 			$this->type = "link";

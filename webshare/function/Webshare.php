@@ -7,7 +7,7 @@ A simple, lightweight, self hosted webservice to easily share files and links vi
 
 by Friedinger (friedinger.org)
 
-Version: 2.0
+Version: 2.0.1
 
 */
 
@@ -35,15 +35,15 @@ final class Webshare
 		$share = new Share();
 		$getShare = $share->getShare($request->uri());
 		if (!$getShare) return false;
-		if ($share->password) {
-			$page = new Pages($request, $share);
-			$passwordPage = $page->passwordPage();
-			if (!$passwordPage) return true;
-		}
 		if ($request->get("action") == "delete") {
 			$page = new Pages($request, $share);
 			$deletePage = $page->deletePage();
 			if ($deletePage) return true;
+		}
+		if ($share->password) {
+			$page = new Pages($request, $share);
+			$passwordPage = $page->passwordPage();
+			if (!$passwordPage) return true;
 		}
 		return $share->redirectShare($request);
 	}
