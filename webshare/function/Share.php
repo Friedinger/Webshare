@@ -23,14 +23,18 @@ final class Share
 	public function addShare(Request $request): string
 	{
 		$db = $this->database();
+
 		$this->uri = mysqli_real_escape_string($db, htmlspecialchars(preg_replace("/[^a-z0-9_-]/", "", strtolower($request->post("uri")))));
-		if ($this->uri == "admin") return "errorUri";
+		if ($this->uri == "admin" || strlen($this->uri) > 255) return "errorUri";
+
 		$this->expireDate = mysqli_real_escape_string($db, htmlspecialchars($request->post("expireDate")));
 		if (empty($this->expireDate)) $this->expireDate = null;
+
 		$this->password = mysqli_real_escape_string($db, htmlspecialchars($request->post("password")));
 		if (!empty($this->password)) {
 			$this->password = password_hash($this->password, PASSWORD_DEFAULT);
 		} else $this->password = null;
+
 		if (!empty($request->post("link")) && empty($request->file("file", "size"))) {
 			$this->type = "link";
 			$this->value = mysqli_real_escape_string($db, urldecode($request->post("link")));
@@ -57,6 +61,7 @@ final class Share
 	}
 	private function addShareToDatabase(\Mysqli $db): string
 	{
+		if (strlen($this->value) > 255) return "error";
 		$addShare = mysqli_prepare($db, "INSERT IGNORE INTO " . Config::DB_TABLE . " (uri, type, value, password, expireDate) VALUES (?, ?, ?, ?, ?)");
 		mysqli_stmt_bind_param($addShare, "sssss", $this->uri, $this->type, $this->value, $this->password, $this->expireDate);
 		mysqli_stmt_execute($addShare);
