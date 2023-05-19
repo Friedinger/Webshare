@@ -2,7 +2,7 @@
 <html lang="en">
 
 <head>
-	<title>Webshare | <?= Friedinger\Webshare\Output::$value ?></title>
+	<title>Webshare | <?= Webshare\Output::$value ?></title>
 	<meta name='viewport' content='width=device-width, initial-scale=1.0'>
 	<style>
 		html {
@@ -140,7 +140,7 @@
 	</style>
 	<script>
 		function copyLink() {
-			navigator.clipboard.writeText("https://<?= Friedinger\Webshare\Output::url() ?>");
+			navigator.clipboard.writeText("https://<?= Webshare\Output::url() ?>");
 			document.getElementById("copyLink").innerHTML = "Link copied";
 			setTimeout(function() {
 				document.getElementById("copyLink").innerHTML = "Copy Link";
@@ -151,7 +151,7 @@
 
 <body>
 	<header>
-		<div class="fileName"><?= Friedinger\Webshare\Output::$value ?></div>
+		<div class="fileName"><?= Webshare\Output::$value ?></div>
 		<a href="?action=download">
 			<div class="download-icon"></div>
 			Download
@@ -161,7 +161,7 @@
 			<span id="copyLink">Copy Link</span>
 		</a>
 	</header>
-	<main><?= Friedinger\Webshare\Output::$sharePreview ?></main>
+	<main><?= Webshare\Output::$sharePreview ?></main>
 </body>
 
 </html>

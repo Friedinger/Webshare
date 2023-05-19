@@ -60,18 +60,18 @@
 
 <body>
 	<h1>Webshare Delete</h1>
-	<?php if (Friedinger\Webshare\Output::$status == "success") { ?>
+	<?php if (Webshare\Output::$status == "success") { ?>
 		<p>Share successfully deleted.</p>
-	<?php } elseif (Friedinger\Webshare\Output::$status == "error") { ?>
+	<?php } elseif (Webshare\Output::$status == "error") { ?>
 		<p>Share deleting failed. Please contact webmaster.</p>
 	<?php } else { ?>
-		<p>Do you really want to delete the share <i><?= Friedinger\Webshare\Output::$uri ?></i>?</p>
+		<p>Do you really want to delete the share <i><?= Webshare\Output::$uri ?></i>?</p>
 		<form method="post">
-			<input type="hidden" name="deleteShare" value="<?= Friedinger\Webshare\Output::$uri ?>">
+			<input type="hidden" name="deleteShare" value="<?= Webshare\Output::$uri ?>">
 			<input type="submit" name="submit" value="Delete"><br>
 		</form>
 	<?php } ?>
-	<p><?= Friedinger\Webshare\Output::link("admin", "Admin Page") ?></p>
+	<p><?= Webshare\Output::link("admin", "Admin Page") ?></p>
 </body>
 
 </html>

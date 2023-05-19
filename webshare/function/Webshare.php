@@ -7,16 +7,18 @@ A simple, lightweight, self hosted webservice to easily share files and links vi
 
 by Friedinger (friedinger.org)
 
-Version: 2.0.2
+Version: 2.1
 
 */
 
-namespace Friedinger\Webshare;
+namespace Webshare;
 
-require_once("Request.php");
-require_once("Share.php");
-require_once("Pages.php");
-require_once("Output.php");
+spl_autoload_register(function ($class) {
+	if (str_starts_with($class, __NAMESPACE__ . "\\")) {
+		$class = str_replace(__NAMESPACE__ . "\\", "", $class);
+		require_once("{$class}.php");
+	}
+});
 
 final class Webshare
 {
@@ -29,20 +31,17 @@ final class Webshare
 	private function handleRequest(Request $request)
 	{
 		if ($request->uri() == "admin") {
-			$page = new Pages($request);
-			return $page->adminPage();
+			return (new Pages($request))->adminPage();
 		}
 		$share = new Share();
 		$getShare = $share->getShare($request->uri());
 		if (!$getShare) return false;
 		if ($request->get("action") == "delete") {
-			$page = new Pages($request, $share);
-			$deletePage = $page->deletePage();
+			$deletePage =  (new Pages($request, $share))->deletePage();
 			if ($deletePage) return true;
 		}
 		if ($share->password) {
-			$page = new Pages($request, $share);
-			$passwordPage = $page->passwordPage();
+			$passwordPage = (new Pages($request, $share))->passwordPage();
 			if (!$passwordPage) return true;
 		}
 		return $share->redirectShare($request);

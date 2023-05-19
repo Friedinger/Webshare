@@ -2,4 +2,15 @@
 
 require_once($_SERVER["DOCUMENT_ROOT"] . "/../webshare/webshareConfig.php");
 require_once($_SERVER["DOCUMENT_ROOT"] . "/../webshare/function/Webshare.php");
-$webshare = new Friedinger\Webshare\Webshare();
+
+if (session_id() == "") {
+	session_set_cookie_params([
+		"secure" => true,
+		"httponly" => true,
+		"samesite" => "Strict",
+	]);
+	session_name("Webshare");
+	session_start();
+}
+
+$webshare = new Webshare\Webshare();

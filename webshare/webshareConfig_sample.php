@@ -7,17 +7,12 @@ A simple, lightweight, self hosted webservice to easily share files and links vi
 
 by Friedinger (friedinger.org)
 
-Version: 2.0.2
+Version: 2.1
 
 */
 
-namespace Friedinger\Webshare;
+namespace Webshare;
 
-spl_autoload_register(function ($className) {
-	include $className . '.php';
-});
-
-if (!isset($_SESSION)) session_start();
 class Config
 {
 	const INSTALL_PATH = "/"; // Set the path in which the index.php file is located or at which uri it's content is executed. Must start and end with a slash

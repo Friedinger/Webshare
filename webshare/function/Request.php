@@ -9,7 +9,7 @@ by Friedinger (friedinger.org)
 
 */
 
-namespace Friedinger\Webshare;
+namespace Webshare;
 
 final class Request
 {

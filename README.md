@@ -51,14 +51,14 @@ To customize your Webshare installation to your personal design, you can replace
 
 ### General outputs
 
-The `Friedinger\Webshare\Output` object provides a variety of information about the current share:
+The `Webshare\Output` object provides a variety of information about the current share:
 
--   `Friedinger\Webshare\Output::$uri`: The uri of the share
--   `Friedinger\Webshare\Output::$value`: The value of the share, either the link or the filename. Should not be used in password page, because it provides information without entering the password.
--   `Friedinger\Webshare\Output::$expireDate`: The timestamp when the share will expire
--   `Friedinger\Webshare\Output::$createDate`: The timestamp of the share creation time
--   `Friedinger\Webshare\Output::$status`: Status information about the current share action, can only be used on some pages.
--   `Friedinger\Webshare\Output::link($uri, $text, $longLink)`: Function to output a link to an URI in webshare, for example the admin page. _$uri_ sets the URI to link to, _$text_ adjusts the text that is visible (default is the link itself), $longLink controls wether the link should just be the URI / text or an complete link with hostname and option to copy it.
+-   `Webshare\Output::$uri`: The uri of the share
+-   `Webshare\Output::$value`: The value of the share, either the link or the filename. Should not be used in password page, because it provides information without entering the password.
+-   `Webshare\Output::$expireDate`: The timestamp when the share will expire
+-   `Webshare\Output::$createDate`: The timestamp of the share creation time
+-   `Webshare\Output::$status`: Status information about the current share action, can only be used on some pages.
+-   `Webshare\Output::link($uri, $text, $longLink)`: Function to output a link to an URI in webshare, for example the admin page. _$uri_ sets the URI to link to, _$text_ adjusts the text that is visible (default is the link itself), $longLink controls wether the link should just be the URI / text or an complete link with hostname and option to copy it.
 
 ### Admin page
 
@@ -75,7 +75,7 @@ The admin page must offer a form to add a share which consists of the following 
 </form>
 ```
 
-To display messages after attempting to add a share you can use the status provided with php in the `Friedinger\Webshare\Output::$status` variable.
+To display messages after attempting to add a share you can use the status provided with php in the `Webshare\Output::$status` variable.
 It can have the following values, check out sample admin page for an example of handling these values:
 
 -   `success`: The share was successfully added
@@ -95,7 +95,7 @@ To display the list of existing shares, a table must be added to the admin page.
 	<th><a href="?sort=expireDate">Expire Date</a></th>
 	<th><a href="?sort=createDate">Create Date</a></th>
 	<th>Action</th>
-	<?= Friedinger\Webshare\Output::$shareList ?>
+	<?= Webshare\Output::$shareList ?>
 </table>
 ```
 
@@ -106,7 +106,7 @@ A sample admin page can be found [here](/webshare/adminPage_sample.php).
 The view page should display an preview of the requested file. Therefore the following php code must be included to output the preview.
 
 ```php
-<?= Friedinger\Webshare\Output::$sharePreview ?>
+<?= Webshare\Output::$sharePreview ?>
 ```
 
 A sample view page can be found [here](/webshare/viewPage_sample.php).
@@ -122,7 +122,7 @@ The password page must contain a form to enter the password to access the protec
 </form>
 ```
 
-The status of the password access is provided by the `Friedinger\Webshare\Output::$status` variable. Its value is set to `incorrect` if the entered password is not correct. If the password matches the user is directly redirected to the share without displaying any message.
+The status of the password access is provided by the `Webshare\Output::$status` variable. Its value is set to `incorrect` if the entered password is not correct. If the password matches the user is directly redirected to the share without displaying any message.
 
 A sample password page can be found [here](/webshare/passwordPage_sample.php).
 
@@ -132,15 +132,12 @@ The delete page must include a form to confirm the deletion of a share. For that
 
 ```html
 <form method="post">
-	<input
-		type="hidden"
-		name="share"
-		value="<?= Friedinger\Webshare\Output::$uri ?>" />
+	<input type="hidden" name="share" value="<?= Webshare\Output::$uri ?>" />
 	<input type="submit" name="submit" value="Delete" /><br />
 </form>
 ```
 
-To inform the user about a successful deletion, the status of the deletion is provided by the `Friedinger\Webshare\Output::$status` variable. It can have the following values:
+To inform the user about a successful deletion, the status of the deletion is provided by the `Webshare\Output::$status` variable. It can have the following values:
 
 -   `success`: The share was successfully deleted
 -   `error`: An error occurred during the deletion

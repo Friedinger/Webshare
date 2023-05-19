@@ -147,9 +147,9 @@
 		<input type="submit" value="Add share" name="submit"><br>
 	</form>
 	<?php
-	switch (Friedinger\Webshare\Output::$status) {
+	switch (Webshare\Output::$status) {
 		case "success":
-			print("<p>Share added successfully: " . Friedinger\Webshare\Output::link(null, null, true) . "</p>");
+			print("<p>Share added successfully: " . Webshare\Output::link(null, null, true) . "</p>");
 			break;
 		case "errorUri":
 			print("<p>Share adding failed: The entered uri is invalid, please try another one.</p>");
@@ -176,7 +176,7 @@
 			<th style="width: 180px;"><a href="?sort=expireDate">Expire Date</a></th>
 			<th style="width: 180px;"><a href="?sort=createDate">Create Date</a></th>
 			<th style="width: 60px;">Action</th>
-			<?= Friedinger\Webshare\Output::$shareList ?>
+			<?= Webshare\Output::$shareList ?>
 		</table>
 	</div>
 </body>
