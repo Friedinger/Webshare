@@ -14,15 +14,11 @@ namespace Friedinger\Webshare;
 final class Request
 {
 	private string $uri;
-	private array $get;
-	private array $post;
 	private array $file;
 	private array $session;
 	public function __construct(string $requestUri)
 	{
 		$this->uri = $this->prepareRequest($requestUri);
-		$this->get = $_GET;
-		$this->post = $_POST;
 		$this->file = $_FILES;
 		$this->session = $_SESSION;
 	}
@@ -32,13 +28,15 @@ final class Request
 	}
 	public function get(string $key): string|null
 	{
-		if (empty($this->get[$key])) return null;
-		return htmlspecialchars($this->get[$key]);
+		$get = filter_input(INPUT_GET, $key);
+		if (empty($get)) return null;
+		return htmlspecialchars($get);
 	}
 	public function post(string $key): string|null
 	{
-		if (empty($this->post[$key])) return null;
-		return htmlspecialchars($this->post[$key]);
+		$post = filter_input(INPUT_POST, $key);
+		if (empty($post)) return null;
+		return htmlspecialchars($post);
 	}
 	public function file(string ...$keys): mixed
 	{
@@ -68,8 +66,11 @@ final class Request
 	{
 		$request = htmlspecialchars(strtolower(urldecode($requestUri))); // Remove special chars from request
 		$request = str_replace(Config::INSTALL_PATH, "", $request); // Remove install path from request
-		$request = explode("?", $request)[0]; // Remove parameters
+		$request = parse_url($request)["path"]; // Remove parameters
+		$request = rtrim($request, "/") . "/"; // Force trailing slash
+		$request = str_replace("/index.php/", "", $request); // Remove index.php
 		$request = rtrim($request, "/"); // Remove trailing slash
+		$request = ltrim($request, "/"); // Remove start slash
 		return $request;
 	}
 }

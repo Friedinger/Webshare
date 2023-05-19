@@ -24,6 +24,7 @@ final class Share
 	{
 		$db = $this->database();
 		$this->uri = mysqli_real_escape_string($db, htmlspecialchars(preg_replace("/[^a-z0-9_-]/", "", strtolower($request->post("uri")))));
+		if ($this->uri == "admin") return "errorUri";
 		$this->expireDate = mysqli_real_escape_string($db, htmlspecialchars($request->post("expireDate")));
 		if (empty($this->expireDate)) $this->expireDate = null;
 		$this->password = mysqli_real_escape_string($db, htmlspecialchars($request->post("password")));
