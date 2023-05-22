@@ -13,17 +13,11 @@ Version: 2.1
 
 namespace Webshare;
 
-spl_autoload_register(function ($class) {
-	if (str_starts_with($class, __NAMESPACE__ . "\\")) {
-		$class = str_replace(__NAMESPACE__ . "\\", "", $class);
-		require_once("{$class}.php");
-	}
-});
-
 final class Webshare
 {
 	public function __construct()
 	{
+		$this->autoload();
 		$request = new Request($_SERVER["REQUEST_URI"]);
 		$handle = $this->handleRequest($request);
 		if (!$handle) Config::error404();
@@ -45,5 +39,14 @@ final class Webshare
 			if (!$passwordPage) return true;
 		}
 		return $share->redirectShare($request);
+	}
+	private function autoload()
+	{
+		spl_autoload_register(function ($class) {
+			if (str_starts_with($class, __NAMESPACE__ . "\\")) {
+				$class = str_replace(__NAMESPACE__ . "\\", "", $class);
+				require_once("{$class}.php");
+			}
+		});
 	}
 }
