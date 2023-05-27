@@ -13,72 +13,70 @@ namespace Webshare;
 
 final class Share
 {
-	public $uri;
-	public $type;
-	public $value;
-	public $password;
-	public $expireDate;
-	public $createDate;
-	public $file;
+	public string|null $uri;
+	public string|null $type;
+	public string|null $value;
+	public string|null $password;
+	public string|null $expireDate;
+	public string|null $createDate;
+	public string|null $file;
+	private Database $db;
+	public function __construct()
+	{
+		$this->db = new Database();
+	}
 	public function addShare(Request $request): string
 	{
-		$db = $this->database();
-
-		$this->uri = mysqli_real_escape_string($db, htmlspecialchars(preg_replace("/[^a-z0-9_-]/", "", strtolower($request->post("uri")))));
+		$this->uri = htmlspecialchars(preg_replace("/[^a-z0-9_-]/", "", strtolower($request->post("uri"))));
 		if ($this->uri == "admin" || strlen($this->uri) > 255) return "errorUri";
 
-		$this->expireDate = mysqli_real_escape_string($db, htmlspecialchars($request->post("expireDate")));
+		$this->expireDate = htmlspecialchars($request->post("expireDate"));
 		if (empty($this->expireDate)) $this->expireDate = null;
 
-		$this->password = mysqli_real_escape_string($db, htmlspecialchars($request->post("password")));
+		$this->password = htmlspecialchars($request->post("password"));
 		if (!empty($this->password)) {
 			$this->password = password_hash($this->password, PASSWORD_DEFAULT);
 		} else $this->password = null;
 
 		if (!empty($request->post("link")) && empty($request->file("file", "size"))) {
 			$this->type = "link";
-			$this->value = mysqli_real_escape_string($db, urldecode($request->post("link")));
+			$this->value = htmlspecialchars(urldecode($request->post("link")));
 			if (!preg_match("/^https?:\/\//", $this->value)) $this->value = "https://" . $this->value;
-			return $this->addShareToDatabase($db);
+			return $this->addShareToDatabase();
 		}
 		if (!empty($request->file("file", "size")) && empty($request->post("link"))) {
 			$fileUpload = $request->file("file");
 			switch ($fileUpload["error"]) {
 				case 0:
 					$this->type = "file";
-					$this->value = mysqli_real_escape_string($db, htmlspecialchars($fileUpload["name"]));
+					$this->value = htmlspecialchars($fileUpload["name"]);
 					move_uploaded_file($fileUpload["tmp_name"], $this->pathFile());
-					return $this->addShareToDatabase($db);
+					return $this->addShareToDatabase();
 				case 1:
 					return "errorUploadSize";
 				default:
 					return "error";
 			}
 		}
-		mysqli_close($db);
 		if (!empty($request->post("link")) && !empty($request->file("file", "size"))) return "errorBoth";
 		return "error";
 	}
-	private function addShareToDatabase(\Mysqli $db): string
+	private function addShareToDatabase(): string
 	{
 		if (strlen($this->value) > 255) return "error";
-		$addShare = mysqli_prepare($db, "INSERT IGNORE INTO " . Config::DB_TABLE . " (uri, type, value, password, expireDate) VALUES (?, ?, ?, ?, ?)");
-		mysqli_stmt_bind_param($addShare, "sssss", $this->uri, $this->type, $this->value, $this->password, $this->expireDate);
-		mysqli_stmt_execute($addShare);
-		mysqli_close($db);
-		if (mysqli_stmt_affected_rows($addShare)) return "success";
+		$query = "INSERT IGNORE INTO " . Config::DB_TABLE . " (uri, type, value, password, expireDate) VALUES (:uri, :type, :value, :password, :expireDate)";
+		$params = [":uri" => $this->uri, ":type" => $this->type, ":value" => $this->value, ":password" => $this->password, ":expireDate" => $this->expireDate];
+		$addShare = $this->db->query($query, $params)->fetch();
+		if (!$addShare) return "success";
 		return "errorUri";
 	}
 	public function getShare(string $uri): bool
 	{
-		$db = $this->database();
-		$uri = mysqli_real_escape_string($db, $uri);
-		$getShare = mysqli_prepare($db, "SELECT * FROM " . Config::DB_TABLE . " WHERE uri=? LIMIT 1");
-		mysqli_stmt_bind_param($getShare, "s", $uri);
-		mysqli_stmt_execute($getShare);
-		$share = mysqli_fetch_assoc(mysqli_stmt_get_result($getShare));
-		mysqli_close($db);
-		if ($share == null) return false;
+		$uri = htmlspecialchars($uri);
+		$query = "SELECT * FROM " . Config::DB_TABLE . " WHERE uri=:uri LIMIT 1";
+		$params = ["uri" => $uri];
+		$share = $this->db->query($query, $params)->fetch();
+		if (!$share) return false;
 		$this->uri = $share["uri"];
 		$this->type = $share["type"];
 		$this->value = $share["value"];
@@ -130,10 +128,8 @@ final class Share
 			"createDate" => "createDate DESC",
 		);
 		$shareSort = $sortOptions[$sort];
-		$db = $this->database();
-		$listShares = mysqli_prepare($db, "SELECT * FROM " . Config::DB_TABLE . " ORDER BY " . Config::DB_TABLE . "." . $shareSort);
-		mysqli_stmt_execute($listShares);
-		$shares = mysqli_fetch_all(mysqli_stmt_get_result($listShares), MYSQLI_ASSOC);
+		$query = "SELECT * FROM " . Config::DB_TABLE . " ORDER BY " . Config::DB_TABLE . "." . $shareSort;
+		$shares = $this->db->query($query)->fetchAll();
 		$shareList = "";
 		foreach ($shares as $shareContent) {
 			if (!empty($shareContent["password"])) {
@@ -160,19 +156,11 @@ final class Share
 			if (!file_exists($this->pathFile())) return "error";
 			unlink($this->pathFile());
 		}
-		$db = $this->database();
-		$deleteShare = mysqli_prepare($db, "DELETE FROM " . Config::DB_TABLE . " WHERE uri=?");
-		mysqli_stmt_bind_param($deleteShare, "s", $this->uri);
-		mysqli_stmt_execute($deleteShare);
-		mysqli_close($db);
-		if (mysqli_stmt_affected_rows($deleteShare)) return "success";
+		$query = "DELETE FROM " . Config::DB_TABLE . " WHERE uri=:uri";
+		$params = [":uri" => $this->uri];
+		$deleteShare = $this->db->query($query, $params);
+		if ($deleteShare->rowCount()) return "success";
 		return "error";
-	}
-	private function database(): \mysqli|false
-	{
-		$db = mysqli_connect(Config::DB_HOST, Config::DB_USERNAME, Config::DB_PASSWORD, config::DB_NAME);
-		if (!$db) die("Database connection failed.");
-		return $db;
 	}
 	private function pathFile(): string
 	{

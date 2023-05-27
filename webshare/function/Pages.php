@@ -101,9 +101,9 @@ final class Pages
 	}
 	private function outputShareInfo(): void
 	{
-		Output::$uri = $this->share->uri;
-		Output::$value = $this->share->value;
-		Output::$expireDate = $this->share->expireDate;
-		Output::$createDate = $this->share->createDate;
+		Output::$uri = $this->share->uri ?? null;
+		Output::$value = $this->share->value ?? null;
+		Output::$expireDate = $this->share->expireDate ?? null;
+		Output::$createDate = $this->share->createDate ?? null;
 	}
 }
