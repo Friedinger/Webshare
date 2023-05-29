@@ -26,10 +26,10 @@ Version 2.2
     It should have the following structure:
     | name | type | null | default |
     | ---- | ---- | ---- | ---- |
-    | uri | varchar(255) | no | none |
-    | type | varchar(255) | no | none |
-    | value | varchar(255) | no | none |
-    | password | varchar(255) | yes | NULL |
+    | uri | varchar(50) | no | none |
+    | type | varchar(50) | no | none |
+    | value | varchar(200) | no | none |
+    | password | varchar(200) | yes | NULL |
     | expireDate | timestamp | yes | NULL |
     | createDate | timestamp | no | current_timestamp() |
 
