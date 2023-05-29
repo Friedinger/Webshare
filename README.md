@@ -30,8 +30,8 @@ Version 2.2
     | type | varchar(50) | no | none |
     | value | varchar(200) | no | none |
     | password | varchar(200) | yes | NULL |
-    | expireDate | timestamp | yes | NULL |
-    | createDate | timestamp | no | current_timestamp() |
+    | expireDate | datetime | yes | NULL |
+    | createDate | datetime | no | current_timestamp() |
 
     Make _uri_ a primary key index to ensure unique short links.
 
