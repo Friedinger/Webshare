@@ -35,6 +35,8 @@ Version 2.0
 
     Make _uri_ a primary key index to ensure unique short links.
 
+    For an easy installation you can use the _install.sql_ file provided with webshare.
+
 5. Adjust the _index.php_ file: Set the require paths to the _Webshare.php_ and _webshareConfig.php_ files so that they get loaded properly.
 6. Adjust config file:
     - Set the webshare install path when you moved the _index.php_ file into a subdirectory of root directory.
