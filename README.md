@@ -2,7 +2,7 @@
 
 Webshare: A simple, lightweight, self hosted webservice to easily share files and links via an short custom URL.
 
-Version 2.0
+Version 2.2
 
 ## Features
 
