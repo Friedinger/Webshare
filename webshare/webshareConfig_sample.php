@@ -26,6 +26,38 @@ class Config
 	const DB_PASSWORD = "Database password"; // Mysql database password
 	const DB_NAME = "Database name"; // Mysql database name
 	const DB_TABLE = "webshare"; // Mysql database table to store webshare data
+	const TEXT_FORM = [
+		"labelUri" => "Uri",
+		"labelFile" => "File",
+		"labelExpireDate" => "Expire Date",
+		"labelPassword" => "Password",
+		"labelSeparator" => ": ",
+		"buttonAdd" => "Add share",
+		"buttonDelete" => "Delete share",
+		"buttonPassword" => "Submit password",
+	];
+	const TEXT_ADD = [
+		"success" => "Share added successfully: LINK",
+		// "success" => "Share added successfully: " . Output::link(null, null, true),
+		"errorUri" => "Share adding failed: The entered uri is invalid, please try another one.",
+		"errorBoth" => "Share adding failed: File and link offered, please only choose one.",
+		"errorUploadSize" => "Share adding failed: File size limit exceeded.",
+		"error" => "Share adding failed. Please contact webmaster.",
+	];
+	const TEXT_DELETE = [
+		"heading" => "Webshare Delete",
+		"default" => "Do you really want to delete the share <i>URI</i>?",
+		// "default" => "Do you really want to delete the share <i>" . Output::$uri . "</i>?",
+		"success" => "Share successfully deleted.",
+		"error" => "Share deleting failed. Please contact webmaster.",
+	];
+	const TEXT_PASSWORD = [
+		"heading" => "The share <i>URI</i> is password protected",
+		// "heading" => "The share <i>" . Output::$uri . "</i> is password protected",
+		"default" => "Please enter the password to access the share <i>URI</i>.",
+		// "default" => "Please enter the password to access the share <i>" . Output::$uri . "</i>.",
+		"incorrect" => "The entered password is incorrect, please try again.",
+	];
 	public static function error404(): void
 	{
 		// Action if requested share doesn't exist
