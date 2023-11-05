@@ -60,7 +60,7 @@ The `Webshare\Output` object provides a variety of information about the current
 -   `Webshare\Output::$expireDate`: The timestamp when the share will expire
 -   `Webshare\Output::$createDate`: The timestamp of the share creation time
 -   `Webshare\Output::$status`: Status information about the current share action, can only be used on some pages.
--   `Webshare\Output::link($uri, $text, $longLink)`: Function to output a link to an URI in webshare, for example the admin page. _$uri_ sets the URI to link to, _$text_ adjusts the text that is visible (default is the link itself), $longLink controls wether the link should just be the URI / text or an complete link with hostname and option to copy it.
+-   `Webshare\Output::link($uri, $text, $longLink)`: Function to output a link to an URI in webshare, for example the admin page. _$uri_ sets the URI to link to, _$text_ adjusts the text that is visible (default is the link itself), _$longLink_ controls wether the link should just be the URI / text or an complete link with hostname and option to copy it.
 
 ### Admin page
 
