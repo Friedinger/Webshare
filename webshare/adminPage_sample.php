@@ -147,25 +147,14 @@
 		<input type="submit" value="Add share" name="submit"><br>
 	</form>
 	<?php
-	switch (Webshare\Output::$status) {
-		case "success":
-			print("<p>Share added successfully: " . Webshare\Output::link(null, null, true) . "</p>");
-			break;
-		case "errorUri":
-			print("<p>Share adding failed: The entered uri is invalid, please try another one.</p>");
-			break;
-		case "errorBoth":
-			print("<p>Share adding failed: File and link offered, please only choose one.</p>");
-			break;
-		case "errorUploadSize":
-			print("<p>Share adding failed: File size limit exceeded.</p>");
-			break;
-		case "error":
-			print("<p>Share adding failed. Please contact webmaster.</p>");
-			break;
-		default:
-			break;
-	}
+	print match (Webshare\Output::$status) {
+		"success" => "<p>Share added successfully: " . Webshare\Output::link(null, null, true) . "</p>",
+		"errorUri" => "<p>Share adding failed: The entered uri is invalid, please try another one.</p>",
+		"errorBoth" => "<p>Share adding failed: File and link offered, please only choose one.</p>",
+		"errorUploadSize" => "<p>Share adding failed: File size limit exceeded.</p>",
+		"error" => "<p>Share adding failed. Please contact webmaster.</p>",
+		default => null,
+	};
 	?>
 	<div class="shareList">
 		<table>
