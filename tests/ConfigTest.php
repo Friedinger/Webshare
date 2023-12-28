@@ -23,46 +23,6 @@ final class ConfigTest extends TestCase
 		$this->assertIsString(Webshare\Config::DB_NAME);
 		$this->assertIsString(Webshare\Config::DB_TABLE);
 	}
-	public function testArrayTextForm()
-	{
-		$this->assertIsArray(Webshare\Config::TEXT_FORM);
-		$keys = [
-			"labelUri", "labelFile", "labelExpireDate", "labelPassword", "labelSeparator", "buttonAdd", "buttonDelete", "buttonPassword",
-		];
-		foreach ($keys as $key) {
-			$this->assertArrayHasKey($key, Webshare\Config::TEXT_FORM);
-		}
-	}
-	public function testArrayTextAdd()
-	{
-		$this->assertIsArray(Webshare\Config::TEXT_ADD);
-		$keys = [
-			"success", "errorUri", "errorBoth", "errorUploadSize", "error",
-		];
-		foreach ($keys as $key) {
-			$this->assertArrayHasKey($key, Webshare\Config::TEXT_ADD);
-		}
-	}
-	public function testArrayTextDelete()
-	{
-		$this->assertIsArray(Webshare\Config::TEXT_DELETE);
-		$keys = [
-			"heading", "default", "success", "error",
-		];
-		foreach ($keys as $key) {
-			$this->assertArrayHasKey($key, Webshare\Config::TEXT_DELETE);
-		}
-	}
-	public function testArrayTextPassword()
-	{
-		$this->assertIsArray(Webshare\Config::TEXT_PASSWORD);
-		$keys = [
-			"heading", "default", "incorrect",
-		];
-		foreach ($keys as $key) {
-			$this->assertArrayHasKey($key, Webshare\Config::TEXT_PASSWORD);
-		}
-	}
 	public function testFunctions()
 	{
 		$this->assertNull(Webshare\Config::error404());

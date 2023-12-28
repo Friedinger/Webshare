@@ -56,7 +56,7 @@ final class Request
 		}
 		return $session;
 	}
-	public function setSession(string $key, array $value): bool
+	public function setSession(string $key, mixed $value): bool
 	{
 		$_SESSION[$key] = $value;
 		$this->session[$key] = $value;
