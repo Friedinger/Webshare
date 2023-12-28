@@ -57,16 +57,15 @@ final class Pages
 	public function passwordPage(): bool
 	{
 		if ($this->request->session("webshare", $this->share->uri)) return true;
-		print("<h1>" . Config::TEXT_PASSWORD["heading"] . "</h1>");
 		$inputPassword = $this->request->post("password");
 		if ($inputPassword) {
 			if (password_verify($inputPassword, $this->share->password)) {
 				$_SESSION["webshare"][$this->share->uri] = true;
 				return true;
 			}
-			print("<p>" . Config::TEXT_PASSWORD["incorrect"] . "</p>");
-		} else print("<p>" . Config::TEXT_PASSWORD["default"] . "</p>");
-		print("<form method=\"post\"><label>" . Config::TEXT_FORM["labelPassword"] . Config::TEXT_FORM["labelSeparator"] . "</label><input type=\"password\" name=\"password\"><br><input type=\"submit\" value=\"" . Config::TEXT_FORM["buttonPassword"] . "\" name=\"submit\"><br></form>");
+			Output::$status = "incorrect";
+		} else Output::$status = "default";
+		$this->loadPage("password");
 		return false;
 	}
 	public function deletePage(): bool
