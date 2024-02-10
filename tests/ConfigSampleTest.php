@@ -7,7 +7,7 @@ final class ConfigSampleTest extends TestCase
 	protected function setUp(): void
 	{
 		$_SERVER["DOCUMENT_ROOT"] = __DIR__ . "/../home/";
-		require_once($_SERVER["DOCUMENT_ROOT"] . "/../webshare/webshareConfig_sample.php");
+		require_once($_SERVER["DOCUMENT_ROOT"] . "/../config/webshareConfig_sample.php");
 	}
 	public function testStrings()
 	{

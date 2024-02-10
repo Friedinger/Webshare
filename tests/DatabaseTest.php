@@ -7,8 +7,8 @@ final class DatabaseTest extends TestCase
 	protected function setUp(): void
 	{
 		$_SERVER["DOCUMENT_ROOT"] = __DIR__ . "/../home/";
-		require_once($_SERVER["DOCUMENT_ROOT"] . "/../webshare/webshareConfig.php");
-		require_once($_SERVER["DOCUMENT_ROOT"] . "/../webshare/function/Database.php");
+		require_once($_SERVER["DOCUMENT_ROOT"] . "/../config/webshareConfig.php");
+		require_once($_SERVER["DOCUMENT_ROOT"] . "/../function/Database.php");
 	}
 	public function testConnection()
 	{

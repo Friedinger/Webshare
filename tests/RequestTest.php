@@ -7,8 +7,8 @@ final class RequestTest extends TestCase
 	protected function setUp(): void
 	{
 		$_SERVER["DOCUMENT_ROOT"] = __DIR__ . "/../home/";
-		require_once($_SERVER["DOCUMENT_ROOT"] . "/../webshare/webshareConfig.php");
-		require_once($_SERVER["DOCUMENT_ROOT"] . "/../webshare/function/Request.php");
+		require_once($_SERVER["DOCUMENT_ROOT"] . "/../config/webshareConfig.php");
+		require_once($_SERVER["DOCUMENT_ROOT"] . "/../function/Request.php");
 		$_SERVER["REQUEST_URI"] = "";
 		$_SESSION = [];
 	}
