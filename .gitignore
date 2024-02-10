@@ -1,0 +1,10 @@
+.*
+!.gitignore
+/.vscode
+/webshare/webshareConfig.php
+/webshare/adminPage.php
+/webshare/files/*
+notes.md
+/vendor
+config/*
+!config/*_sample.php
