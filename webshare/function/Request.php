@@ -14,30 +14,39 @@ namespace Webshare;
 final class Request
 {
 	private string $uri;
+	private array $get;
+	private array $post;
 	private array $file;
 	private array $session;
-	public function __construct(string $requestUri)
+
+	public function __construct()
 	{
-		$this->uri = $this->prepareRequest($requestUri);
-		$this->file = $_FILES;
+		$this->uri = $this->prepareUri($_SERVER["REQUEST_URI"]);
+		$this->get = $_GET;
+		$this->post = $_POST;
+		$this->file =  $_FILES;
 		$this->session = $_SESSION;
 	}
+
 	public function uri(): string
 	{
 		return htmlspecialchars($this->uri);
 	}
+
 	public function get(string $key): string|null
 	{
-		$get = filter_input(INPUT_GET, $key);
+		$get = $this->get[$key] ?? null;
 		if (empty($get)) return null;
 		return htmlspecialchars($get);
 	}
+
 	public function post(string $key): string|null
 	{
-		$post = filter_input(INPUT_POST, $key);
+		$post = $this->post[$key] ?? null;
 		if (empty($post)) return null;
 		return htmlspecialchars($post);
 	}
+
 	public function file(string ...$keys): mixed
 	{
 		$file = $this->file;
@@ -47,6 +56,7 @@ final class Request
 		}
 		return $file;
 	}
+
 	public function session(string ...$keys): mixed
 	{
 		$session = $this->session;
@@ -56,21 +66,23 @@ final class Request
 		}
 		return $session;
 	}
+
 	public function setSession(string $key, mixed $value): bool
 	{
 		$_SESSION[$key] = $value;
 		$this->session[$key] = $value;
 		return $_SESSION[$key] == $value;
 	}
-	private function prepareRequest(string $requestUri): string
+
+	private function prepareUri(string $requestUri): string
 	{
-		$request = htmlspecialchars(strtolower(urldecode($requestUri))); // Remove special chars from request
-		$request = str_replace(Config::INSTALL_PATH, "", $request); // Remove install path from request
-		$request = parse_url($request)["path"]; // Remove parameters
-		$request = rtrim($request, "/") . "/"; // Force trailing slash
-		$request = str_replace("/index.php/", "", $request); // Remove index.php
-		$request = rtrim($request, "/"); // Remove trailing slash
-		$request = ltrim($request, "/"); // Remove start slash
-		return $request;
+		$uri = htmlspecialchars(strtolower(urldecode($requestUri))); // Remove special chars from request
+		$uri = ltrim($uri, Config::INSTALL_PATH); // Remove install path from request
+		$uri = parse_url($uri, PHP_URL_PATH); // Remove parameters
+		$uri = rtrim($uri, "/") . "/"; // Force trailing slash
+		$uri = str_replace("/index.php/", "", $uri); // Remove index.php
+		$uri = rtrim($uri, "/"); // Remove trailing slash
+		$uri = ltrim($uri, "/"); // Remove start slash
+		return $uri;
 	}
 }

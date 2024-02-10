@@ -18,7 +18,7 @@ final class Webshare
 	public function __construct()
 	{
 		$this->autoload();
-		$request = new Request($_SERVER["REQUEST_URI"]);
+		$request = new Request();
 		$handle = $this->handleRequest($request);
 		if (!$handle) Config::error404();
 	}
