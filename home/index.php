@@ -1,7 +1,7 @@
 <?php
 
-require_once($_SERVER["DOCUMENT_ROOT"] . "/../webshare/webshareConfig.php");
-require_once($_SERVER["DOCUMENT_ROOT"] . "/../webshare/function/Webshare.php");
+require_once($_SERVER["DOCUMENT_ROOT"] . "/../config/webshareConfig.php");
+require_once($_SERVER["DOCUMENT_ROOT"] . "/../function/Webshare.php");
 
 if (session_id() == "") {
 	session_set_cookie_params([
