@@ -18,27 +18,26 @@ final class Webshare
 	public function __construct()
 	{
 		$this->autoload();
-		$request = new Request();
-		$handle = $this->handleRequest($request);
+		$handle = $this->handleRequest();
 		if (!$handle) Config::error404();
 	}
-	private function handleRequest(Request $request)
+	private function handleRequest()
 	{
-		if ($request->uri() == "admin") {
-			return (new Pages($request))->adminPage();
+		if (Request::uri() == "admin") {
+			return (new Pages())->adminPage();
 		}
 		$share = new Share();
-		$getShare = $share->getShare($request->uri());
+		$getShare = $share->getShare(Request::uri());
 		if (!$getShare) return false;
-		if ($request->get("action") == "delete") {
-			$deletePage =  (new Pages($request, $share))->deletePage();
+		if (Request::get("action") == "delete") {
+			$deletePage =  (new Pages($share))->deletePage();
 			if ($deletePage) return true;
 		}
 		if ($share->password) {
-			$passwordPage = (new Pages($request, $share))->passwordPage();
+			$passwordPage = (new Pages($share))->passwordPage();
 			if (!$passwordPage) return true;
 		}
-		return $share->redirectShare($request);
+		return $share->redirectShare();
 	}
 	private function autoload()
 	{

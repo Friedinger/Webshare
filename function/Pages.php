@@ -13,11 +13,9 @@ namespace Webshare;
 
 final class Pages
 {
-	private Request $request;
 	private Share $share;
-	public function __construct(Request $request, Share $share = null)
+	public function __construct(Share $share = null)
 	{
-		$this->request = $request;
 		$this->share = $share ?? new Share();
 		$this->outputShareInfo();
 	}
@@ -27,11 +25,11 @@ final class Pages
 			Config::noAdminAccess();
 			return true;
 		}
-		if ($this->request->post("submit")) {
-			Output::$status = $this->share->addShare($this->request);
+		if (Request::post("submit")) {
+			Output::$status = $this->share->addShare();
 			$this->outputShareInfo();
 		}
-		Output::$shareList = $this->share->listShares($this->request->get("sort") ?? "createDate");
+		Output::$shareList = $this->share->listShares(Request::get("sort") ?? "createDate");
 		$this->loadPage("admin");
 		return true;
 	}
@@ -56,8 +54,8 @@ final class Pages
 	}
 	public function passwordPage(): bool
 	{
-		if ($this->request->session("webshare", $this->share->uri)) return true;
-		$inputPassword = $this->request->post("password");
+		if (Request::session("webshare", $this->share->uri)) return true;
+		$inputPassword = Request::post("password");
 		if ($inputPassword) {
 			if (password_verify($inputPassword, $this->share->password)) {
 				$_SESSION["webshare"][$this->share->uri] = true;
@@ -71,7 +69,7 @@ final class Pages
 	public function deletePage(): bool
 	{
 		if (!Config::adminAccess()) return false;
-		if ($this->request->post("deleteShare")) {
+		if (Request::post("deleteShare")) {
 			Output::$status = $this->share->deleteShare();
 		}
 		$this->loadPage("delete");

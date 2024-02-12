@@ -25,27 +25,27 @@ final class Share
 	{
 		$this->db = new Database();
 	}
-	public function addShare(Request $request): string
+	public function addShare(): string
 	{
-		$this->uri = htmlspecialchars(preg_replace("/[^a-z0-9_-]/", "", strtolower($request->post("uri"))));
+		$this->uri = htmlspecialchars(preg_replace("/[^a-z0-9_-]/", "", strtolower(Request::post("uri"))));
 		if ($this->uri == "admin" || strlen($this->uri) > 255) return "errorUri";
 
-		$this->expireDate = htmlspecialchars($request->post("expireDate"));
+		$this->expireDate = htmlspecialchars(Request::post("expireDate"));
 		if (empty($this->expireDate)) $this->expireDate = null;
 
-		$this->password = htmlspecialchars($request->post("password"));
+		$this->password = htmlspecialchars(Request::post("password"));
 		if (!empty($this->password)) {
 			$this->password = password_hash($this->password, PASSWORD_DEFAULT);
 		} else $this->password = null;
 
-		if (!empty($request->post("link")) && empty($request->file("file", "size"))) {
+		if (!empty(Request::post("link")) && empty(Request::file("file", "size"))) {
 			$this->type = "link";
-			$this->value = htmlspecialchars(urldecode($request->post("link")));
+			$this->value = htmlspecialchars(urldecode(Request::post("link")));
 			if (!preg_match("/^https?:\/\//", $this->value)) $this->value = "https://" . $this->value;
 			return $this->addShareToDatabase();
 		}
-		if (!empty($request->file("file", "size")) && empty($request->post("link"))) {
-			$fileUpload = $request->file("file");
+		if (!empty(Request::file("file", "size")) && empty(Request::post("link"))) {
+			$fileUpload = Request::file("file");
 			switch ($fileUpload["error"]) {
 				case 0:
 					$this->type = "file";
@@ -58,7 +58,7 @@ final class Share
 					return "error";
 			}
 		}
-		if (!empty($request->post("link")) && !empty($request->file("file", "size"))) return "errorBoth";
+		if (!empty(Request::post("link")) && !empty(Request::file("file", "size"))) return "errorBoth";
 		return "error";
 	}
 	private function addShareToDatabase(): string
@@ -90,7 +90,7 @@ final class Share
 		}
 		return true;
 	}
-	public function redirectShare(Request $request): bool
+	public function redirectShare(): bool
 	{
 		if ($this->type == "link") {
 			header("Location:" . $this->value);
@@ -98,21 +98,21 @@ final class Share
 		}
 		if ($this->type == "file") {
 			if (!file_exists($this->file)) return false;
-			if ($request->get("action") == "view") {
+			if (Request::get("action") == "view") {
 				header("Content-Disposition: inline; filename=" . $this->value);
 				header("Content-Type: " . mime_content_type($this->file));
 				header("Content-Length: " . filesize($this->file));
 				readfile($this->file);
 				return true;
 			}
-			if ($request->get("action") == "download") {
+			if (Request::get("action") == "download") {
 				header("Content-Disposition: attachment; filename=" . $this->value);
 				header("Content-Type: " . mime_content_type($this->file));
 				header("Content-Length: " . filesize($this->file));
 				readfile($this->file);
 				return true;
 			}
-			$page = new Pages($request, $this);
+			$page = new Pages($this);
 			return $page->viewPage();
 		}
 		return false;

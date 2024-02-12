@@ -13,43 +13,37 @@ namespace Webshare;
 
 final class Request
 {
-	private string $uri;
-	private array $get;
-	private array $post;
-	private array $file;
-	private array $session;
-
-	public function __construct()
+	public static function uri(): string
 	{
-		$this->uri = $this->prepareUri($_SERVER["REQUEST_URI"]);
-		$this->get = $_GET;
-		$this->post = $_POST;
-		$this->file =  $_FILES;
-		$this->session = $_SESSION;
+		$uri = $_SERVER["REQUEST_URI"];
+		$uri = htmlspecialchars(strtolower(urldecode($uri))); // Remove special chars from request
+		$uri = explode(Config::INSTALL_PATH, $uri, 2)[1]; // Remove install path
+		$uri = parse_url($uri, PHP_URL_PATH); // Remove parameters
+		$uri = rtrim($uri, "/") . "/"; // Force trailing slash
+		$uri = "/" . ltrim($uri, "/"); // Force start slash
+		$uri = str_replace("/index.php/", "", $uri); // Remove index.php
+		$uri = rtrim($uri, "/"); // Remove trailing slash
+		$uri = ltrim($uri, "/"); // Remove start slash
+		return htmlspecialchars($uri);
 	}
 
-	public function uri(): string
+	public static function get(string $key): string|null
 	{
-		return htmlspecialchars($this->uri);
-	}
-
-	public function get(string $key): string|null
-	{
-		$get = $this->get[$key] ?? null;
+		$get = $_GET[$key] ?? null;
 		if (empty($get)) return null;
 		return htmlspecialchars($get);
 	}
 
-	public function post(string $key): string|null
+	public static function post(string $key): string|null
 	{
-		$post = $this->post[$key] ?? null;
+		$post = $_POST[$key] ?? null;
 		if (empty($post)) return null;
 		return htmlspecialchars($post);
 	}
 
-	public function file(string ...$keys): mixed
+	public static function file(string ...$keys): mixed
 	{
-		$file = $this->file;
+		$file = $_FILES;
 		foreach ($keys as $key) {
 			if (!isset($file[$key])) return null;
 			$file = $file[$key];
@@ -57,9 +51,9 @@ final class Request
 		return $file;
 	}
 
-	public function session(string ...$keys): mixed
+	public static function session(string ...$keys): mixed
 	{
-		$session = $this->session;
+		$session = $_SESSION;
 		foreach ($keys as $key) {
 			if (!isset($session[$key])) return null;
 			$session = $session[$key];
@@ -67,22 +61,9 @@ final class Request
 		return $session;
 	}
 
-	public function setSession(string $key, mixed $value): bool
+	public static function setSession(string $key, mixed $value): bool
 	{
 		$_SESSION[$key] = $value;
-		$this->session[$key] = $value;
 		return $_SESSION[$key] == $value;
-	}
-
-	private function prepareUri(string $requestUri): string
-	{
-		$uri = htmlspecialchars(strtolower(urldecode($requestUri))); // Remove special chars from request
-		$uri = ltrim($uri, Config::INSTALL_PATH); // Remove install path from request
-		$uri = parse_url($uri, PHP_URL_PATH); // Remove parameters
-		$uri = rtrim($uri, "/") . "/"; // Force trailing slash
-		$uri = str_replace("/index.php/", "", $uri); // Remove index.php
-		$uri = rtrim($uri, "/"); // Remove trailing slash
-		$uri = ltrim($uri, "/"); // Remove start slash
-		return $uri;
 	}
 }
