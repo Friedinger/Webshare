@@ -1,5 +1,7 @@
 <?php
 
+namespace Webshare;
+
 use PHPUnit\Framework\TestCase;
 
 final class ConfigTest extends TestCase
@@ -11,22 +13,22 @@ final class ConfigTest extends TestCase
 	}
 	public function testStrings()
 	{
-		$this->assertIsString(Webshare\Config::INSTALL_PATH);
-		$this->assertIsString(Webshare\Config::PATH_STORAGE);
-		$this->assertIsString(Webshare\Config::PATH_ADMIN);
-		$this->assertIsString(Webshare\Config::PATH_VIEW);
-		$this->assertIsString(Webshare\Config::PATH_PASSWORD);
-		$this->assertIsString(Webshare\Config::PATH_DELETE);
-		$this->assertIsString(Webshare\Config::DB_HOST);
-		$this->assertIsString(Webshare\Config::DB_USERNAME);
-		$this->assertIsString(Webshare\Config::DB_PASSWORD);
-		$this->assertIsString(Webshare\Config::DB_NAME);
-		$this->assertIsString(Webshare\Config::DB_TABLE);
+		$this->assertIsString(Config::INSTALL_PATH);
+		$this->assertIsString(Config::PATH_STORAGE);
+		$this->assertIsString(Config::PATH_ADMIN);
+		$this->assertIsString(Config::PATH_VIEW);
+		$this->assertIsString(Config::PATH_PASSWORD);
+		$this->assertIsString(Config::PATH_DELETE);
+		$this->assertIsString(Config::DB_HOST);
+		$this->assertIsString(Config::DB_USERNAME);
+		$this->assertIsString(Config::DB_PASSWORD);
+		$this->assertIsString(Config::DB_NAME);
+		$this->assertIsString(Config::DB_TABLE);
 	}
 	public function testFunctions()
 	{
-		$this->assertNull(Webshare\Config::error404());
-		$this->assertIsBool(Webshare\Config::adminAccess());
-		$this->assertNull(Webshare\Config::noAdminAccess());
+		$this->assertNull(Config::error404());
+		$this->assertIsBool(Config::adminAccess());
+		$this->assertNull(Config::noAdminAccess());
 	}
 }
