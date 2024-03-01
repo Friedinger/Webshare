@@ -1,46 +1,139 @@
 <?php
 
-/*
-
-Webshare
-A simple, lightweight, self hosted webservice to easily share files and links via an short custom URL.
-
-by Friedinger (friedinger.org)
-
-*/
-
 namespace Webshare;
+
+use DOMDocument;
+use DOMNode;
 
 final class Output
 {
-	public static string|null $status = null;
-	public static string|null $uri = null;
-	public static string|null $value = null;
-	public static string|null $expireDate = null;
-	public static string|null $createDate = null;
-	public static string|null $sharePreview = null; // Only available in view page
-	public static string|null $shareList = null;
-	public static function url($uri = null): string|null
+	private DOMDocument $dom;
+
+	public function __construct(string $pagePath)
 	{
-		$uri = $uri ?? self::$uri;
-		if ($uri == null) return null;
-		return $_SERVER["HTTP_HOST"] . Config::INSTALL_PATH . $uri;
+		$this->dom = new DOMDocument();
+		$this->dom->loadHTMLFile($_SERVER["DOCUMENT_ROOT"] . $pagePath, LIBXML_NOERROR);
 	}
-	public static function link(string $uri = null, string|null $text = null, bool $longLink = false): string
+
+	public function printPage(Share $share = null): void
 	{
-		$uri = htmlspecialchars($uri ?? self::$uri);
-		$shareLink = self::url($uri);
-		if ($longLink) {
-			$text = htmlspecialchars($text ?? $shareLink);
-			return "
-				<a href='//" . $shareLink . "'>https://" . $text . "</a>
-				<a href='javascript:void(0);' onclick='navigator.clipboard.writeText(`https://" . $shareLink . "`);'>
-					<span class='copy-icon'></span>
-				</a>
-			";
-		} else {
-			$text = htmlspecialchars($text ?? $uri);
-			return "<a href='//" . $shareLink . "'>" . $text . "</a> ";
+		if ($share) {
+			$this->replaceCommon($share);
+		}
+		echo $this->dom->saveHTML();
+	}
+
+	public function getContent(string $tagName): string|null
+	{
+		$node = $this->dom->getElementsByTagName($tagName)->item(0);
+		if (!$node) return null;
+		$dom = new DOMDocument;
+		foreach ($node->childNodes as $child) {
+			$dom->appendChild($dom->importNode($child, true));
+		}
+		return str_replace("%20", " ", $dom->saveHTML());
+	}
+
+	public function replace(string $tag, string|null $content, string $type = "text"): void
+	{
+		$tag = strtolower($tag);
+		$this->replaceNodes($tag, $content, $type);
+		$this->replaceAttributes($tag, $content ?? "");
+	}
+
+	public function replaceCommon(Share $share): void
+	{
+		$this->replace("share-uri", $share->uri());
+		$this->replace("share-type", $share->type());
+		$this->replace("share-value", $share->value());
+		$this->replace("share-password", $share->password() ? Config::TEXT_OUTPUT["passwordIsSet"] : Config::TEXT_OUTPUT["passwordNotSet"]);
+		$this->replace("share-expire", $share->expireDate() ?? Config::TEXT_OUTPUT["noExpireDate"]);
+		$this->replace("share-create", $share->createDate());
+		$this->replace("share-url", Config::INSTALL_PATH . $share->uri());
+		$this->replace("share-installPath", Config::INSTALL_PATH);
+		$this->replace("share-adminLink", Config::ADMIN_LINK);
+	}
+
+	private function replaceNodes(string $tag, string|null $content, string $type = "text"): void
+	{
+		$nodeList = $this->dom->getElementsByTagName($tag);
+		if ($nodeList->length == 0) return;
+		$nodes = [];
+		$replacement = $this->createNode($content, $type);
+		foreach ($nodeList as $node) {
+			array_push($nodes, $node);
+		}
+		foreach ($nodes as $node) {
+			$element = $replacement->cloneNode(true);
+			self::copyAttributes($node, $element);
+			$node->parentNode->replaceChild($element, $node);
+		}
+	}
+
+	private function replaceAttributes(string $tag, string|null $content): void
+	{
+		$content = $content ?? "";
+		$xpath = new \DOMXPath($this->dom);
+		$nodes = $xpath->query("//" . "*[@*[contains(translate(., 'ABCDEFGHIJKLMNOPQRSTUVWXYZ', 'abcdefghijklmnopqrstuvwxyz'), '" . $tag . "')]]");
+		foreach ($nodes as $node) {
+			foreach ($node->attributes as $attribute) {
+				$value = $attribute->value;
+				$value = str_ireplace("<" . $tag . "></" . $tag . ">", $content, $value);
+				$value = str_ireplace("<" . $tag . " />", $content, $value);
+				$value = str_ireplace("<" . $tag . "/>", $content, $value);
+				$value = str_ireplace("<" . $tag . ">", $content, $value);
+				$attribute->value = $value;
+			}
+		}
+	}
+
+	private function createNode(string|null $value, string $type = "text"): DOMNode
+	{
+		switch ($type) {
+			case "iframe":
+				$element = $this->dom->createElement("iframe");
+				$element->setAttribute("src", "?action=view");
+				$element->setAttribute("title", $value);
+				break;
+			case "code":
+				$element = $this->dom->createElement("code");
+				$element->nodeValue = htmlspecialchars(str_replace("\n", "<br>", $value));
+				break;
+			case "img":
+				$element = $this->dom->createElement("img");
+				$element->setAttribute("src", "?action=view");
+				$element->setAttribute("alt", $value);
+				break;
+			case "audio":
+				$element = $this->dom->createElement("audio");
+				$element->setAttribute("src", "?action=view");
+				$element->setAttribute("controls", true);
+				break;
+			case "video":
+				$element = $this->dom->createElement("video");
+				$element->setAttribute("src", "?action=view");
+				$element->setAttribute("controls", true);
+				break;
+			case "xml":
+				$element = $this->dom->createDocumentFragment();
+				$element->appendXML($value);
+				break;
+			default:
+				$element = $this->dom->createTextNode($value);
+				break;
+		}
+		return $element;
+	}
+
+	private function copyAttributes($origNode, $newNode): void
+	{
+		if ($newNode->nodeType == XML_TEXT_NODE || $newNode->nodeType == XML_DOCUMENT_FRAG_NODE) {
+			return;
+		}
+		if ($origNode->hasAttributes()) {
+			foreach ($origNode->attributes as $attribute) {
+				$newNode->setAttribute($attribute->name, $attribute->value);
+			}
 		}
 	}
 }
