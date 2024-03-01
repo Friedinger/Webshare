@@ -16,9 +16,9 @@ use PDOStatement;
 
 final class Database
 {
-	private $connection;
+	private static PDO $connection;
 
-	public function __construct()
+	private static function connect()
 	{
 		$dsn = "mysql:host=" . Config::DB_HOST . ";dbname=" . Config::DB_NAME . ";charset=utf8mb4";
 		$options = [
@@ -26,12 +26,28 @@ final class Database
 			PDO::ATTR_ERRMODE            => PDO::ERRMODE_EXCEPTION,
 			PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
 		];
-		$this->connection = new PDO($dsn, Config::DB_USERNAME, Config::DB_PASSWORD, $options);
+		self::$connection = new PDO($dsn, Config::DB_USERNAME, Config::DB_PASSWORD, $options);
 	}
-	public function query(string $query, array $params = []): PDOStatement
+
+	public static function query(string $query, array $params = []): PDOStatement
 	{
-		$statement = $this->connection->prepare($query);
-		$statement->execute($params);
+		if (!isset(self::$connection)) {
+			try {
+				self::connect();
+			} catch (\PDOException) {
+				throw new DatabaseException("Error while connecting to database");
+			}
+		}
+		try {
+			$statement = self::$connection->prepare($query);
+		} catch (\PDOException) {
+			throw new DatabaseException("Error while preparing query");
+		}
+		try {
+			$statement->execute($params);
+		} catch (\PDOException) {
+			throw new DatabaseException("Error while executing query");
+		}
 		return $statement;
 	}
 }

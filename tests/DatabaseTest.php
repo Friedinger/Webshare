@@ -1,5 +1,7 @@
 <?php
 
+namespace Webshare;
+
 use PHPUnit\Framework\TestCase;
 
 final class DatabaseTest extends TestCase
@@ -9,19 +11,19 @@ final class DatabaseTest extends TestCase
 		$_SERVER["DOCUMENT_ROOT"] = __DIR__ . "/../home/";
 		require_once($_SERVER["DOCUMENT_ROOT"] . "/../config/webshareConfig.php");
 		require_once($_SERVER["DOCUMENT_ROOT"] . "/../function/Database.php");
-	}
-	public function testConnection()
-	{
-		$database = new Webshare\Database();
-		$this->assertObjectHasProperty("connection", $database);
+		require_once($_SERVER["DOCUMENT_ROOT"] . "/../function/Exception.php");
 	}
 	public function testTable()
 	{
-		$database = new Webshare\Database();
 		$query = "SELECT COLUMN_NAME FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_SCHEMA = :database AND TABLE_NAME = :table";
-		$params = [":database" => Webshare\Config::DB_NAME, ":table" => Webshare\Config::DB_TABLE];
-		$tableColumns = $database->query($query, $params)->fetchAll();
+		$params = [":database" => Config::DB_NAME, ":table" => Config::DB_TABLE];
+		$tableColumns = Database::query($query, $params)->fetchAll();
 		$expectedColumns = ["uri", "type", "value", "password", "expireDate", "createDate"];
 		$this->assertEquals($expectedColumns, array_column($tableColumns, "COLUMN_NAME"));
+	}
+	public function testException()
+	{
+		$this->expectException(DatabaseException::class);
+		Database::query("SELECT * FROM nonExistentTable");
 	}
 }
