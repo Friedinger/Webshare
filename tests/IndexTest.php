@@ -1,5 +1,7 @@
 <?php
 
+namespace Webshare;
+
 use PHPUnit\Framework\TestCase;
 
 final class IndexTest extends TestCase
