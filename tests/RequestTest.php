@@ -4,8 +4,6 @@ namespace Webshare;
 
 use \PHPUnit\Framework\TestCase;
 
-use function PHPUnit\Framework\assertEquals;
-
 class Config
 {
 	const INSTALL_PATH = "/install/";
@@ -97,27 +95,14 @@ final class RequestTest extends TestCase
 
 	public function testSetSession()
 	{
-		$request = new Request();
+		// Test with single key
+		Request::setSession("value1", "test");
+		$this->assertEquals("value1", $_SESSION["test"]);
+		$this->assertEquals("value1", Request::session("test"));
 
-		// Test setting session with string value
-		$key = "test1";
-		$value = "value1";
-		$this->assertTrue($request->setSession($key, $value));
-		$this->assertEquals($value, $_SESSION[$key]);
-		$this->assertEquals($value, $request->session($key));
-
-		// Test setting session with integer value
-		$key = "test2";
-		$value = 123;
-		$this->assertTrue($request->setSession($key, $value));
-		$this->assertEquals($value, $_SESSION[$key]);
-		$this->assertEquals($value, $request->session($key));
-
-		// Test setting session with array value
-		$key = "test3";
-		$value = ["value1", "value2"];
-		$this->assertTrue($request->setSession($key, $value));
-		$this->assertEquals($value, $_SESSION[$key]);
-		$this->assertEquals($value, $request->session($key));
+		// Test with multiple keys
+		Request::setSession("value2", "test1", "test2");
+		$this->assertEquals("value2", $_SESSION["test1"]["test2"]);
+		$this->assertEquals("value2", Request::session("test1", "test2"));
 	}
 }
