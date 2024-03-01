@@ -7,7 +7,7 @@ A simple, lightweight, self hosted webservice to easily share files and links vi
 
 by Friedinger (friedinger.org)
 
-Version: 2.3
+Version: 3.0
 
 */
 
@@ -19,33 +19,50 @@ final class Webshare
 	{
 		$this->autoload();
 		$handle = $this->handleRequest();
-		if (!$handle) Config::error404();
+		if (!$handle) {
+			Config::error404();
+		}
 	}
-	private function handleRequest()
+
+	private function handleRequest(): bool
 	{
-		if (Request::uri() == "admin") {
-			return (new Pages())->adminPage();
+		if (Request::uri() == Config::ADMIN_LINK) {
+			return Page::admin();
 		}
-		$share = new Share();
-		$getShare = $share->getShare(Request::uri());
-		if (!$getShare) return false;
+		if (isset(Config::PATH_INCLUDES[Request::uri()])) {
+			return Page::include(Config::PATH_INCLUDES[Request::uri()]);
+		}
+		try {
+			$share = Share::get(Request::uri());
+		} catch (ShareException) {
+			return false;
+		}
 		if (Request::get("action") == "delete") {
-			$deletePage =  (new Pages($share))->deletePage();
-			if ($deletePage) return true;
+			$delete = Page::delete($share);
+			if ($delete) return true;
 		}
-		if ($share->password) {
-			$passwordPage = (new Pages($share))->passwordPage();
-			if (!$passwordPage) return true;
+		if ($share->password()) {
+			$password = Page::password($share);
+			if ($password) return true;
 		}
-		return $share->redirectShare();
+		try {
+			$share->redirect();
+			return true;
+		} catch (ShareException) {
+			return false;
+		}
 	}
+
 	private function autoload()
 	{
 		spl_autoload_register(function ($class) {
 			if (str_starts_with($class, __NAMESPACE__ . "\\")) {
 				$class = str_replace(__NAMESPACE__ . "\\", "", $class);
-				require_once("{$class}.php");
 			}
+			if (str_ends_with($class, "Exception")) {
+				$class = "Exception";
+			}
+			require_once("{$class}.php");
 		});
 	}
 }
