@@ -13,111 +13,154 @@ namespace Webshare;
 
 final class Share
 {
-	public string|null $uri;
-	public string|null $type;
-	public string|null $value;
-	public string|null $password;
-	public string|null $expireDate;
-	public string|null $createDate;
-	public string|null $file;
-	private Database $db;
-	public function __construct()
+	private string $uri;
+	private string $type;
+	private string|array $value;
+	private string|null $password;
+	private string|null $expireDate;
+	private string|null $createDate;
+
+	public function __construct(string $uri, string $type, string|array $value, string|null $password, string|null $expireDate, string|null $createDate = null)
 	{
-		$this->db = new Database();
-	}
-	public function addShare(): string
-	{
-		$this->uri = htmlspecialchars(preg_replace("/[^a-z0-9_-]/", "", strtolower(Request::post("uri"))));
-		if ($this->uri == "admin" || strlen($this->uri) > 255) return "errorUri";
-
-		$this->expireDate = htmlspecialchars(Request::post("expireDate"));
-		if (empty($this->expireDate)) $this->expireDate = null;
-
-		$this->password = htmlspecialchars(Request::post("password"));
-		if (!empty($this->password)) {
-			$this->password = password_hash($this->password, PASSWORD_DEFAULT);
-		} else $this->password = null;
-
-		if (!empty(Request::post("link")) && empty(Request::file("file", "size"))) {
-			$this->type = "link";
-			$this->value = htmlspecialchars(urldecode(Request::post("link")));
-			if (!preg_match("/^https?:\/\//", $this->value)) $this->value = "https://" . $this->value;
-			return $this->addShareToDatabase();
+		$this->uri = $uri;
+		$this->type = $type;
+		$this->value = $value;
+		$this->password = $password;
+		if ($password && !password_get_info($password)["algo"]) {
+			$this->password = password_hash($password, PASSWORD_DEFAULT);
 		}
-		if (!empty(Request::file("file", "size")) && empty(Request::post("link"))) {
-			$fileUpload = Request::file("file");
-			switch ($fileUpload["error"]) {
-				case 0:
-					$this->type = "file";
-					$this->value = htmlspecialchars($fileUpload["name"]);
-					move_uploaded_file($fileUpload["tmp_name"], $this->pathFile());
-					return $this->addShareToDatabase();
-				case 1:
-					return "errorUploadSize";
-				default:
-					return "error";
-			}
-		}
-		if (!empty(Request::post("link")) && !empty(Request::file("file", "size"))) return "errorBoth";
-		return "error";
+		$this->expireDate = $expireDate;
+		$this->createDate = $createDate;
 	}
-	private function addShareToDatabase(): string
+
+	public function store(): void
 	{
-		if (strlen($this->value) > 255) return "error";
+		if ($this->type == "file") {
+			if ($this->value["error"] == 1) throw new ShareException("File size limit exceeded");
+			if ($this->value["error"] != 0) throw new ShareException("Error while uploading file");
+			if (file_exists($this->filePath())) throw new ShareException("File already exists");
+			$move = move_uploaded_file($this->value["tmp_name"], $this->filePath());
+			if (!$move) throw new ShareException("Error while storing file");
+			$this->value = $this->value["name"];
+		}
 		$query = "INSERT IGNORE INTO " . Config::DB_TABLE . " (uri, type, value, password, expireDate) VALUES (:uri, :type, :value, :password, :expireDate)";
 		$params = [":uri" => $this->uri, ":type" => $this->type, ":value" => $this->value, ":password" => $this->password, ":expireDate" => $this->expireDate];
-		$addShare = $this->db->query($query, $params)->fetch();
-		if (!$addShare) return "success";
-		return "errorUri";
-	}
-	public function getShare(string $uri): bool
-	{
-		$uri = htmlspecialchars($uri);
-		$query = "SELECT * FROM " . Config::DB_TABLE . " WHERE uri=:uri LIMIT 1";
-		$params = ["uri" => $uri];
-		$share = $this->db->query($query, $params)->fetch();
-		if (!$share) return false;
-		$this->uri = $share["uri"];
-		$this->type = $share["type"];
-		$this->value = $share["value"];
-		$this->password = $share["password"];
-		$this->expireDate = $share["expireDate"];
-		$this->createDate = $share["createDate"];
-		if ($this->type == "file") $this->file = $this->pathFile();
-		if (isset($this->expireDate) && strtotime($this->expireDate) < time()) {
-			$this->deleteShare();
-			return false;
+		$addShare = Database::query($query, $params);
+		if ($addShare->rowCount() != 1) {
+			throw new ShareException("Error while storing share to database");
 		}
-		return true;
 	}
-	public function redirectShare(): bool
+
+	public function delete(): void
+	{
+		if ($this->type == "file") {
+			if (!file_exists($this->filePath())) {
+				throw new ShareException("File not found");
+			}
+			unlink($this->filePath());
+		}
+		$query = "DELETE FROM " . Config::DB_TABLE . " WHERE uri=:uri";
+		$params = [":uri" => $this->uri];
+		$deleteShare = Database::query($query, $params);
+		if ($deleteShare->rowCount() != 1) {
+			throw new ShareException("Error while deleting share from database");
+		}
+	}
+
+	public function redirect(): void
 	{
 		if ($this->type == "link") {
-			header("Location:" . $this->value);
-			return true;
+			$this->redirectLink();
 		}
 		if ($this->type == "file") {
-			if (!file_exists($this->file)) return false;
-			if (Request::get("action") == "view") {
-				header("Content-Disposition: inline; filename=" . $this->value);
-				header("Content-Type: " . mime_content_type($this->file));
-				header("Content-Length: " . filesize($this->file));
-				readfile($this->file);
-				return true;
-			}
-			if (Request::get("action") == "download") {
-				header("Content-Disposition: attachment; filename=" . $this->value);
-				header("Content-Type: " . mime_content_type($this->file));
-				header("Content-Length: " . filesize($this->file));
-				readfile($this->file);
-				return true;
-			}
-			$page = new Pages($this);
-			return $page->viewPage();
+			$this->redirectFile();
 		}
-		return false;
 	}
-	public function listShares(string $sort)
+
+	private function redirectLink(): void
+	{
+		header("Location:" . $this->value);
+	}
+
+	private function redirectFile(): void
+	{
+		if (!file_exists($this->filePath())) {
+			throw new ShareException("File not found");
+		}
+		if (Request::get("action") == "view") {
+			header("Content-Disposition: inline; filename=" . $this->value);
+			header("Content-Type: " . mime_content_type($this->filePath()));
+			header("Content-Length: " . filesize($this->filePath()));
+			readfile($this->filePath());
+		}
+		if (Request::get("action") == "download") {
+			header("Content-Disposition: attachment; filename=" . $this->value);
+			header("Content-Type: " . mime_content_type($this->filePath()));
+			header("Content-Length: " . filesize($this->filePath()));
+			readfile($this->filePath());
+		}
+		Page::view($this);
+	}
+
+	private function filePath(): string
+	{
+		if ($this->type == "file") {
+			return $_SERVER["DOCUMENT_ROOT"] . Config::PATH_STORAGE . $this->uri;
+		} else {
+			throw new ShareException("Share is not a file");
+		}
+	}
+
+	public function uri(): string
+	{
+		return $this->uri;
+	}
+
+	public function type(): string
+	{
+		return $this->type;
+	}
+
+	public function value(): string
+	{
+		return $this->value;
+	}
+
+	public function password($inputPassword = null): bool
+	{
+		if (isset($inputPassword)) {
+			return password_verify($inputPassword, $this->password);
+		}
+		return isset($this->password);
+	}
+
+	public function expireDate(): string|null
+	{
+		return $this->expireDate;
+	}
+
+	public function createDate(): string|null
+	{
+		return $this->createDate;
+	}
+
+	public static function get(string $uri): Share
+	{
+		$query = "SELECT * FROM " . Config::DB_TABLE . " WHERE uri=:uri LIMIT 1";
+		$params = ["uri" => $uri];
+		$item = Database::query($query, $params)->fetch();
+		if (!$item) {
+			throw new ShareException("Share not found");
+		}
+		$share = new Share($item["uri"], $item["type"], $item["value"], $item["password"], $item["expireDate"], $item["createDate"]);
+		if (isset($share->expireDate) && strtotime($share->expireDate) < time()) {
+			$share->delete();
+			throw new ShareException("Share expired");
+		}
+		return $share;
+	}
+
+	public static function list(string $sort): array
 	{
 		$sortOptions = array(
 			"uri" => "uri ASC",
@@ -129,41 +172,12 @@ final class Share
 		);
 		$shareSort = $sortOptions[$sort];
 		$query = "SELECT * FROM " . Config::DB_TABLE . " ORDER BY " . Config::DB_TABLE . "." . $shareSort;
-		$shares = $this->db->query($query)->fetchAll();
-		$shareList = "";
-		foreach ($shares as $shareContent) {
-			if (!empty($shareContent["password"])) {
-				$sharePassword = "True";
-			} else $sharePassword = "";
-			$shareList .= "
-				<tr>
-					<td>" . Output::link($shareContent["uri"]) . "</a></td>
-					<td>" . htmlspecialchars($shareContent["type"]) . "</td>
-					<td>" . htmlspecialchars($shareContent["value"]) . "</td>
-					<td>" . $sharePassword . "</td>
-					<td>" . htmlspecialchars($shareContent["expireDate"]) . "</td>
-					<td>" . htmlspecialchars($shareContent["createDate"]) . "</td>
-					<td>" . Output::link($shareContent["uri"] . "?action=delete", "Delete") . "</td>
-				</tr>
-			";
+		$shareList = Database::query($query)->fetchAll();
+		$shares = [];
+		foreach ($shareList as $shareItem) {
+			$share = new Share($shareItem["uri"], $shareItem["type"], $shareItem["value"], $shareItem["password"], $shareItem["expireDate"], $shareItem["createDate"]);
+			array_push($shares, $share);
 		}
-		return $shareList;
-	}
-	public function deleteShare(): string
-	{
-		if (!Config::adminAccess()) return "error";
-		if ($this->type == "file") {
-			if (!file_exists($this->pathFile())) return "error";
-			unlink($this->pathFile());
-		}
-		$query = "DELETE FROM " . Config::DB_TABLE . " WHERE uri=:uri";
-		$params = [":uri" => $this->uri];
-		$deleteShare = $this->db->query($query, $params);
-		if ($deleteShare->rowCount()) return "success";
-		return "error";
-	}
-	private function pathFile(): string
-	{
-		return $_SERVER["DOCUMENT_ROOT"] . Config::PATH_STORAGE . $this->uri;
+		return $shares;
 	}
 }
