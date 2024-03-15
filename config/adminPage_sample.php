@@ -11,14 +11,14 @@
 	<h1>Webshare Admin</h1>
 	Add a new webshare. Either a file share (then upload a file) or a link (then enter a link).
 	<form method="post" enctype="multipart/form-data">
-		<label>URI: </label><input type="text" name="uri" pattern="[a-z0-9_-]+" required><br>
+		<label>URI: </label><input type="text" name="uri" pattern="[a-z0-9_-]+"><br>
 		<label>File: </label><input type="file" name="file"><br>
 		<label>Link: </label><input type="text" name="link"><br>
 		<label>Expire Date: </label><input type="datetime-local" name="expireDate" min="<?= date('Y-m-d\TH:i'); ?>"><br>
 		<label>Password: </label><input type="text" name="password"><br>
 		<input type="submit" value="Add share" name="submit"><br>
 	</form>
-	<share-status />
+	<p><share-status /></p>
 	<div class="shareList">
 		<table>
 			<tr>
