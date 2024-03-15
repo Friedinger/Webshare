@@ -33,21 +33,40 @@ final class Share
 		$this->createDate = $createDate;
 	}
 
+	public static function get(string $uri): Share
+	{
+		$query = "SELECT * FROM " . Config::DB_TABLE . " WHERE uri=:uri LIMIT 1";
+		$params = ["uri" => $uri];
+		$item = Database::query($query, $params)->fetch();
+		if (!$item) {
+			throw new ShareException("share_get_null");
+		}
+		$share = new Share($item["uri"], $item["type"], $item["value"], $item["password"], $item["expireDate"], $item["createDate"]);
+		if (isset($share->expireDate) && strtotime($share->expireDate) < time()) {
+			$share->delete();
+			throw new ShareException("share_get_expired");
+		}
+		return $share;
+	}
+
 	public function store(): void
 	{
 		if ($this->type == "file") {
-			if ($this->value["error"] == 1) throw new ShareException("File size limit exceeded");
-			if ($this->value["error"] != 0) throw new ShareException("Error while uploading file");
-			if (file_exists($this->filePath())) throw new ShareException("File already exists");
-			$move = move_uploaded_file($this->value["tmp_name"], $this->filePath());
-			if (!$move) throw new ShareException("Error while storing file");
+			if ($this->value["error"] == 1) throw new FileException("File size limit exceeded.");
+			if ($this->value["error"] != 0) throw new FileException("Error while uploading file.");
+			if (file_exists($this->filePath())) throw new FileException("File already exists.");
+			try {
+				move_uploaded_file($this->value["tmp_name"], $this->filePath());
+			} catch (\Exception $exception) {
+				throw new FileException("Storing file failed: " . $exception->getMessage());
+			}
 			$this->value = $this->value["name"];
 		}
 		$query = "INSERT IGNORE INTO " . Config::DB_TABLE . " (uri, type, value, password, expireDate) VALUES (:uri, :type, :value, :password, :expireDate)";
 		$params = [":uri" => $this->uri, ":type" => $this->type, ":value" => $this->value, ":password" => $this->password, ":expireDate" => $this->expireDate];
 		$addShare = Database::query($query, $params);
 		if ($addShare->rowCount() != 1) {
-			throw new ShareException("Error while storing share to database");
+			throw new ShareException("Share was not stored in database.");
 		}
 	}
 
@@ -55,15 +74,19 @@ final class Share
 	{
 		if ($this->type == "file") {
 			if (!file_exists($this->filePath())) {
-				throw new ShareException("File not found");
+				throw new FileException("File does not exist.");
 			}
-			unlink($this->filePath());
+			try {
+				unlink($this->filePath());
+			} catch (\Exception $e) {
+				throw new FileException("Deleting file failed: " . $e->getMessage());
+			}
 		}
 		$query = "DELETE FROM " . Config::DB_TABLE . " WHERE uri=:uri";
 		$params = [":uri" => $this->uri];
 		$deleteShare = Database::query($query, $params);
 		if ($deleteShare->rowCount() != 1) {
-			throw new ShareException("Error while deleting share from database");
+			throw new ShareException("Share was not deleted from database.");
 		}
 	}
 
@@ -85,7 +108,7 @@ final class Share
 	private function redirectFile(): void
 	{
 		if (!file_exists($this->filePath())) {
-			throw new ShareException("File not found");
+			throw new FileException("File does not exist.");
 		}
 		if (Request::get("action") == "view") {
 			header("Content-Disposition: inline; filename=" . $this->value);
@@ -104,11 +127,28 @@ final class Share
 
 	private function filePath(): string
 	{
-		if ($this->type == "file") {
-			return $_SERVER["DOCUMENT_ROOT"] . Config::PATH_STORAGE . $this->uri;
-		} else {
-			throw new ShareException("Share is not a file");
+		return $_SERVER["DOCUMENT_ROOT"] . Config::PATH_STORAGE . $this->uri;
+	}
+
+	public static function list(string $sort): array
+	{
+		$sortOptions = array(
+			"uri" => "uri ASC",
+			"type" => "type ASC",
+			"value" => "value ASC",
+			"password" => "password DESC",
+			"expireDate" => "expireDate DESC",
+			"createDate" => "createDate DESC",
+		);
+		$shareSort = $sortOptions[$sort];
+		$query = "SELECT * FROM " . Config::DB_TABLE . " ORDER BY " . Config::DB_TABLE . "." . $shareSort;
+		$shareList = Database::query($query)->fetchAll();
+		$shares = [];
+		foreach ($shareList as $shareItem) {
+			$share = new Share($shareItem["uri"], $shareItem["type"], $shareItem["value"], $shareItem["password"], $shareItem["expireDate"], $shareItem["createDate"]);
+			array_push($shares, $share);
 		}
+		return $shares;
 	}
 
 	public function uri(): string
@@ -142,42 +182,5 @@ final class Share
 	public function createDate(): string|null
 	{
 		return $this->createDate;
-	}
-
-	public static function get(string $uri): Share
-	{
-		$query = "SELECT * FROM " . Config::DB_TABLE . " WHERE uri=:uri LIMIT 1";
-		$params = ["uri" => $uri];
-		$item = Database::query($query, $params)->fetch();
-		if (!$item) {
-			throw new ShareException("Share not found");
-		}
-		$share = new Share($item["uri"], $item["type"], $item["value"], $item["password"], $item["expireDate"], $item["createDate"]);
-		if (isset($share->expireDate) && strtotime($share->expireDate) < time()) {
-			$share->delete();
-			throw new ShareException("Share expired");
-		}
-		return $share;
-	}
-
-	public static function list(string $sort): array
-	{
-		$sortOptions = array(
-			"uri" => "uri ASC",
-			"type" => "type ASC",
-			"value" => "value ASC",
-			"password" => "password DESC",
-			"expireDate" => "expireDate DESC",
-			"createDate" => "createDate DESC",
-		);
-		$shareSort = $sortOptions[$sort];
-		$query = "SELECT * FROM " . Config::DB_TABLE . " ORDER BY " . Config::DB_TABLE . "." . $shareSort;
-		$shareList = Database::query($query)->fetchAll();
-		$shares = [];
-		foreach ($shareList as $shareItem) {
-			$share = new Share($shareItem["uri"], $shareItem["type"], $shareItem["value"], $shareItem["password"], $shareItem["expireDate"], $shareItem["createDate"]);
-			array_push($shares, $share);
-		}
-		return $shares;
 	}
 }
