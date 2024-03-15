@@ -20,25 +20,9 @@ final class Page
 			return false;
 		}
 		$output = new Output(Config::PATH_ADMIN);
-		$status = "";
+		$status = Config::TEXT_ADMIN["default"];
 		if (Request::post("submit")) {
-			if (Request::post("link") && !Request::file("file", "size")) {
-				$type = "link";
-				$value = Request::post("link");
-			} elseif (Request::file("file", "size") && !Request::post("link")) {
-				$type = "file";
-				$value = Request::file("file");
-			}
-			if (isset($type) && isset($value)) {
-				$share = new Share(Request::post("uri"), $type, $value, Request::post("password"), Request::post("expireDate"));
-				try {
-					$share->store();
-				} catch (ShareException $exception) {
-					$status = Config::TEXT_ADMIN["error"] . $exception->getMessage();
-				}
-			} else {
-				$status = Config::TEXT_ADMIN["errorBoth"];
-			}
+			$status = self::adminSubmit();
 		}
 		$output->replace("share-status", $status, "xml");
 		$shares = Share::list(Request::get("sort") ?? "createDate");
@@ -49,6 +33,42 @@ final class Page
 		}
 		$output->printPage();
 		return true;
+	}
+
+	private static function adminSubmit(): string
+	{
+		// Validate URI
+		if (!Request::post("uri")) return Config::TEXT_ADMIN["error_uri"];
+		try {
+			$share = Share::get(Request::post("uri"));
+		} catch (ShareException) {
+			$share = null;
+		}
+		if ($share) return Config::TEXT_ADMIN["error_uri"];
+
+		// Validate Input
+		if (Request::post("link") && !Request::file("file", "size")) {
+			$type = "link";
+			$value = Request::post("link");
+		} elseif (Request::file("file", "size") && !Request::post("link")) {
+			$type = "file";
+			$value = Request::file("file");
+		} elseif (Request::post("link") && Request::file("file", "size")) {
+			return Config::TEXT_ADMIN["error_both"];
+		} else {
+			return Config::TEXT_ADMIN["error_input"];
+		}
+
+		// Store Share
+		$share = new Share(Request::post("uri"), $type, $value, Request::post("password"), Request::post("expireDate"));
+		try {
+			$share->store();
+			return Config::TEXT_ADMIN["success"];
+		} catch (FileException) {
+			return Config::TEXT_ADMIN["error_file"];
+		} catch (ShareException) {
+			return Config::TEXT_ADMIN["error_store"];
+		}
 	}
 
 	public static function view($share): bool
