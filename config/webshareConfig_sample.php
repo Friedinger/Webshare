@@ -62,6 +62,8 @@ class Config
 		"error" => "Deleting share <i><share-uri /></i> failed. Please contact webmaster."
 	];
 
+	const ALLOW_PAGE_PHP = false; // Allow to execute php code in pages. Warning: This can be a security risk if not handled carefully.
+
 	public static function error404(): void
 	{
 		// Action if requested share doesn't exist

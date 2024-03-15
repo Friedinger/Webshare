@@ -12,7 +12,14 @@ final class Output
 	public function __construct(string $pagePath)
 	{
 		$this->dom = new DOMDocument();
-		$this->dom->loadHTMLFile($_SERVER["DOCUMENT_ROOT"] . $pagePath, LIBXML_NOERROR);
+		if (Config::ALLOW_PAGE_PHP) {
+			ob_start();
+			require($_SERVER["DOCUMENT_ROOT"] . $pagePath);
+			$content = ob_get_clean();
+			$this->dom->loadHTML($content, LIBXML_NOERROR);
+		} else {
+			$this->dom->loadHTMLFile($_SERVER["DOCUMENT_ROOT"] . $pagePath, LIBXML_NOERROR);
+		}
 	}
 
 	public function printPage(Share $share = null): void
@@ -50,6 +57,7 @@ final class Output
 		$this->replace("share-expire", $share->expireDate() ?? Config::TEXT_OUTPUT["noExpireDate"]);
 		$this->replace("share-create", $share->createDate());
 		$this->replace("share-url", Config::INSTALL_PATH . $share->uri());
+		$this->replace("share-urlFull", $_SERVER['SERVER_NAME'] . Config::INSTALL_PATH . $share->uri());
 		$this->replace("share-installPath", Config::INSTALL_PATH);
 		$this->replace("share-adminLink", Config::ADMIN_LINK);
 	}
@@ -125,13 +133,13 @@ final class Output
 		return $element;
 	}
 
-	private function copyAttributes($origNode, $newNode): void
+	private function copyAttributes($oldNode, $newNode): void
 	{
 		if ($newNode->nodeType == XML_TEXT_NODE || $newNode->nodeType == XML_DOCUMENT_FRAG_NODE) {
 			return;
 		}
-		if ($origNode->hasAttributes()) {
-			foreach ($origNode->attributes as $attribute) {
+		if ($oldNode->hasAttributes()) {
+			foreach ($oldNode->attributes as $attribute) {
 				$newNode->setAttribute($attribute->name, $attribute->value);
 			}
 		}
