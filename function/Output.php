@@ -9,28 +9,33 @@ final class Output
 {
 	private DOMDocument $dom;
 
-	public function __construct(string $pagePath)
+	public function __construct(string $content, bool $directInput = false)
 	{
 		$this->dom = new DOMDocument();
+		if ($directInput) {
+			$this->dom->loadHTML($content, LIBXML_NOERROR);
+			return;
+		}
 		if (Config::ALLOW_PAGE_PHP) {
 			ob_start();
-			require($_SERVER["DOCUMENT_ROOT"] . $pagePath);
+			require($_SERVER["DOCUMENT_ROOT"] . $content);
 			$content = ob_get_clean();
 			$this->dom->loadHTML($content, LIBXML_NOERROR);
 		} else {
-			$this->dom->loadHTMLFile($_SERVER["DOCUMENT_ROOT"] . $pagePath, LIBXML_NOERROR);
+			$this->dom->loadHTMLFile($_SERVER["DOCUMENT_ROOT"] . $content, LIBXML_NOERROR);
 		}
 	}
 
-	public function printPage(Share $share = null): void
+	public function print(Share $share = null): void
 	{
+		// TODO: Remove the if statement and use the replaceCommon method
 		if ($share) {
 			$this->replaceCommon($share);
 		}
 		echo $this->dom->saveHTML();
 	}
 
-	public function getContent(string $tagName): string|null
+	public function getContent(string $tagName = "body"): string|null
 	{
 		$node = $this->dom->getElementsByTagName($tagName)->item(0);
 		if (!$node) return null;
@@ -57,7 +62,7 @@ final class Output
 		$this->replace("share-expire", $share->expireDate() ?? Config::TEXT_OUTPUT["noExpireDate"]);
 		$this->replace("share-create", $share->createDate());
 		$this->replace("share-url", Config::INSTALL_PATH . $share->uri());
-		$this->replace("share-urlFull", $_SERVER['SERVER_NAME'] . Config::INSTALL_PATH . $share->uri());
+		$this->replace("share-urlFull", Request::baseUrl() . $share->uri());
 		$this->replace("share-installPath", Config::INSTALL_PATH);
 		$this->replace("share-adminLink", Config::ADMIN_LINK);
 	}

@@ -31,22 +31,18 @@ final class Page
 			$output->replace("share-list", $content, "xml");
 			$output->replaceCommon($share);
 		}
-		$output->printPage();
+		$output->print();
 		return true;
 	}
 
 	private static function adminSubmit(): string
 	{
 		// Validate URI
-		if (!Request::post("uri")) return Config::TEXT_ADMIN["error_uri"];
-		try {
-			$share = Share::get(Request::post("uri"));
-		} catch (ShareException) {
-			$share = null;
-		}
-		if ($share) return Config::TEXT_ADMIN["error_uri"];
+		if (!Request::post("uri")) return Config::TEXT_ADMIN["error_uri_empty"];
+		$share = Share::get(Request::post("uri"));
+		if (!is_null($share)) return Config::TEXT_ADMIN["error_uri_used"];
 
-		// Validate Input
+		// Validate type
 		if (Request::post("link") && !Request::file("file", "size")) {
 			$type = "link";
 			$value = Request::post("link");
@@ -54,21 +50,18 @@ final class Page
 			$type = "file";
 			$value = Request::file("file");
 		} elseif (Request::post("link") && Request::file("file", "size")) {
-			return Config::TEXT_ADMIN["error_both"];
+			return Config::TEXT_ADMIN["error_type_both"];
 		} else {
-			return Config::TEXT_ADMIN["error_input"];
+			return Config::TEXT_ADMIN["error_type_none"];
 		}
 
-		// Store Share
+		// Store share
 		$share = new Share(Request::post("uri"), $type, $value, Request::post("password"), Request::post("expireDate"));
-		try {
-			$share->store();
-			return Config::TEXT_ADMIN["success"];
-		} catch (FileException) {
-			return Config::TEXT_ADMIN["error_file"];
-		} catch (ShareException) {
-			return Config::TEXT_ADMIN["error_store"];
-		}
+		$store = $share->store();
+		if (!$store) return Config::TEXT_ADMIN["error_store"];
+		$output = new Output(Config::TEXT_ADMIN["success"], true);
+		$output->replaceCommon($store);
+		return $output->getContent();
 	}
 
 	public static function view($share): bool
@@ -87,7 +80,7 @@ final class Page
 		} else {
 			$output->replace("share-preview", $share->value(), "iframe");
 		}
-		$output->printPage($share);
+		$output->print($share);
 		return true;
 	}
 
@@ -105,7 +98,7 @@ final class Page
 		} else $status = Config::TEXT_PASSWORD["default"];
 		$output = new Output(Config::PATH_PASSWORD);
 		$output->replace("share-status", $status, "xml");
-		$output->printPage($share);
+		$output->print($share);
 		return true;
 	}
 
@@ -122,13 +115,14 @@ final class Page
 					$output->replace("share-form", "");
 				} catch (ShareException $exception) {
 					$status = Config::TEXT_DELETE["error"] . " (" . $exception->getMessage() . ")";
+					// TODO: Remove exception usage
 				}
 			} else {
 				$status = Config::TEXT_DELETE["errorInput"];
 			}
 		}
 		$output->replace("share-status", $status, "xml");
-		$output->printPage($share);
+		$output->print($share);
 		return true;
 	}
 

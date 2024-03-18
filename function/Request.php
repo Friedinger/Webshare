@@ -79,4 +79,19 @@ final class Request
 			return self::setNestedSession($session[$key], $keys, $value);
 		}
 	}
+
+	public static function protocol(): string
+	{
+		return $_SERVER["REQUEST_SCHEME"];
+	}
+
+	public static function httpHost(): string
+	{
+		return $_SERVER["HTTP_HOST"];
+	}
+
+	public static function baseUrl(): string
+	{
+		return self::protocol() . "://" . self::httpHost() . Config::INSTALL_PATH;
+	}
 }

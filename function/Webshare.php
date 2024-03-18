@@ -32,11 +32,10 @@ final class Webshare
 		if (isset(Config::PATH_INCLUDES[Request::uri()])) {
 			return Page::include(Config::PATH_INCLUDES[Request::uri()]);
 		}
-		try {
-			$share = Share::get(Request::uri());
-		} catch (ShareException) {
-			return false;
-		}
+
+		$share = Share::get(Request::uri());
+		if (!$share) return false;
+
 		if (Request::get("action") == "delete") {
 			$delete = Page::delete($share);
 			if ($delete) return true;
@@ -45,12 +44,7 @@ final class Webshare
 			$password = Page::password($share);
 			if ($password) return true;
 		}
-		try {
-			$share->redirect();
-			return true;
-		} catch (ShareException) {
-			return false;
-		}
+		return $share->redirect();
 	}
 
 	private function autoload()
@@ -59,6 +53,7 @@ final class Webshare
 			if (str_starts_with($class, __NAMESPACE__ . "\\")) {
 				$class = str_replace(__NAMESPACE__ . "\\", "", $class);
 			}
+			// TODO: Remove custom exception handling
 			if (str_ends_with($class, "Exception")) {
 				$class = "Exception";
 			}

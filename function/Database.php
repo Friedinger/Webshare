@@ -32,22 +32,10 @@ final class Database
 	public static function query(string $query, array $params = []): PDOStatement
 	{
 		if (!isset(self::$connection)) {
-			try {
-				self::connect();
-			} catch (\PDOException) {
-				throw new DatabaseException("Error while connecting to database");
-			}
+			self::connect();
 		}
-		try {
-			$statement = self::$connection->prepare($query);
-		} catch (\PDOException) {
-			throw new DatabaseException("Error while preparing query");
-		}
-		try {
-			$statement->execute($params);
-		} catch (\PDOException) {
-			throw new DatabaseException("Error while executing query");
-		}
+		$statement = self::$connection->prepare($query);
+		$statement->execute($params);
 		return $statement;
 	}
 }

@@ -33,83 +33,76 @@ final class Share
 		$this->createDate = $createDate;
 	}
 
-	public static function get(string $uri): Share
+	public static function get(string $uri): Share|null
 	{
 		$query = "SELECT * FROM " . Config::DB_TABLE . " WHERE uri=:uri LIMIT 1";
 		$params = ["uri" => $uri];
 		$item = Database::query($query, $params)->fetch();
-		if (!$item) {
-			throw new ShareException("share_get_null");
-		}
+		if (!$item) return null;
 		$share = new Share($item["uri"], $item["type"], $item["value"], $item["password"], $item["expireDate"], $item["createDate"]);
 		if (isset($share->expireDate) && strtotime($share->expireDate) < time()) {
 			$share->delete();
-			throw new ShareException("share_get_expired");
+			return null;
 		}
 		return $share;
 	}
 
-	public function store(): void
+	public function store(): Share|false
 	{
 		if ($this->type == "file") {
-			if ($this->value["error"] == 1) throw new FileException("File size limit exceeded.");
-			if ($this->value["error"] != 0) throw new FileException("Error while uploading file.");
-			if (file_exists($this->filePath())) throw new FileException("File already exists.");
+			if ($this->value["error"] != 0) return false;
+			if (file_exists($this->filePath())) return false;
 			try {
 				move_uploaded_file($this->value["tmp_name"], $this->filePath());
-			} catch (\Exception $exception) {
-				throw new FileException("Storing file failed: " . $exception->getMessage());
+			} catch (\Exception) {
+				return false;
 			}
 			$this->value = $this->value["name"];
 		}
 		$query = "INSERT IGNORE INTO " . Config::DB_TABLE . " (uri, type, value, password, expireDate) VALUES (:uri, :type, :value, :password, :expireDate)";
 		$params = [":uri" => $this->uri, ":type" => $this->type, ":value" => $this->value, ":password" => $this->password, ":expireDate" => $this->expireDate];
 		$addShare = Database::query($query, $params);
-		if ($addShare->rowCount() != 1) {
-			throw new ShareException("Share was not stored in database.");
-		}
+		if ($addShare->rowCount() != 1) return false;
+		return Share::get($this->uri) ?? false;
 	}
 
-	public function delete(): void
+	public function delete(): bool
 	{
 		if ($this->type == "file") {
-			if (!file_exists($this->filePath())) {
-				throw new FileException("File does not exist.");
-			}
+			if (!file_exists($this->filePath())) return false;
 			try {
 				unlink($this->filePath());
-			} catch (\Exception $e) {
-				throw new FileException("Deleting file failed: " . $e->getMessage());
+			} catch (\Exception) {
+				return false;
 			}
 		}
 		$query = "DELETE FROM " . Config::DB_TABLE . " WHERE uri=:uri";
 		$params = [":uri" => $this->uri];
 		$deleteShare = Database::query($query, $params);
-		if ($deleteShare->rowCount() != 1) {
-			throw new ShareException("Share was not deleted from database.");
-		}
+		return $deleteShare->rowCount() == 1;
 	}
 
-	public function redirect(): void
+	public function redirect(): bool
 	{
 		if ($this->type == "link") {
-			$this->redirectLink();
+			return $this->redirectLink();
 		}
 		if ($this->type == "file") {
-			$this->redirectFile();
+			return $this->redirectFile();
 		}
+		return false;
 	}
 
-	private function redirectLink(): void
+	private function redirectLink(): bool
 	{
+		// TODO: Add support for other protocols and default to https
 		header("Location:" . $this->value);
+		return true;
 	}
 
-	private function redirectFile(): void
+	private function redirectFile(): bool
 	{
-		if (!file_exists($this->filePath())) {
-			throw new FileException("File does not exist.");
-		}
+		if (!file_exists($this->filePath())) return false;
 		if (Request::get("action") == "view") {
 			header("Content-Disposition: inline; filename=" . $this->value);
 			header("Content-Type: " . mime_content_type($this->filePath()));
@@ -122,7 +115,7 @@ final class Share
 			header("Content-Length: " . filesize($this->filePath()));
 			readfile($this->filePath());
 		}
-		Page::view($this);
+		return Page::view($this);
 	}
 
 	private function filePath(): string

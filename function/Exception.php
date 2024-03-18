@@ -4,6 +4,11 @@ namespace Webshare;
 
 class WebshareException extends \Exception
 {
+	public function __construct(string $code, string $message = "")
+	{
+		$message = $message ?: Config::TEXT_ADMIN[$code] ?? Config::TEXT_ADMIN["default"];
+		parent::__construct($message);
+	}
 }
 
 class FileException extends \Exception
