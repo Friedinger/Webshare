@@ -43,23 +43,24 @@ class Config
 	];
 	const TEXT_ADMIN = [
 		// Output texts for admin page
-		"success" => "Share added successfully: Webshare\Output::link(null, null, true)",
-		"errorUri" => "Share adding failed: The entered uri is invalid, please try another one.",
-		"errorBoth" => "Share adding failed: File and link offered, please only choose one.",
-		"errorUploadSize" => "Share adding failed: File size limit exceeded.",
-		"error" => "Share adding failed. Please contact webmaster.",
 		"default" => "",
+		"success" => "Share added successfully: <a href='<share-urlFull />'><share-urlFull /></a>",
+		"error_uri_empty" => "Share adding failed: Please enter a uri.",
+		"error_uri_used" => "Share adding failed: The entered uri is invalid, please try another one.",
+		"error_type_none" => "Share adding failed: No file or link offered, please submit one of them.",
+		"error_type_both" => "Share adding failed: File and link offered, please only choose one.",
+		"error_store" => "Share adding failed: Error while storing share.",
 	];
 	const TEXT_PASSWORD = [
 		// Output texts for password page
+		"default" => "Please enter the password to access the share <i><share-uri /></i>.",
 		"incorrect" => "The entered password is incorrect, please try again.",
-		"default" => "Please enter the password to access the share <i><share-uri /></i>."
 	];
 	const TEXT_DELETE = [
 		// Output texts for delete page
 		"success" => "Share <i><share-uri /></i> successfully deleted.",
-		"errorInput" => "Please enter the correct uri to delete the share.",
-		"error" => "Deleting share <i><share-uri /></i> failed. Please contact webmaster."
+		"error_input" => "Please enter the correct uri to delete the share <i><share-uri /></i>.",
+		"error" => "Deleting share <i><share-uri /></i> failed. Please contact webmaster.",
 	];
 
 	const ALLOW_PAGE_PHP = false; // Allow to execute php code in pages. Warning: This can be a security risk if not handled carefully.

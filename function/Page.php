@@ -87,6 +87,7 @@ final class Page
 	public static function password($share): bool
 	{
 		if (Request::session("webshare", $share->uri())) return false;
+		$status = Config::TEXT_PASSWORD["default"];
 		if (Request::post("submit")) {
 			$inputPassword = Request::post("password") ?? "";
 			if ($share->password($inputPassword)) {
@@ -95,7 +96,7 @@ final class Page
 				return false;
 			}
 			$status = Config::TEXT_PASSWORD["incorrect"];
-		} else $status = Config::TEXT_PASSWORD["default"];
+		}
 		$output = new Output(Config::PATH_PASSWORD);
 		$output->replace("share-status", $status, "xml");
 		$output->print($share);
@@ -109,16 +110,15 @@ final class Page
 		$output = new Output(Config::PATH_DELETE);
 		if (Request::post("submit")) {
 			if (Request::post("uri") == $share->uri()) {
-				try {
-					$share->delete();
+				$delete = $share->delete();
+				if ($delete) {
 					$status = Config::TEXT_DELETE["success"];
 					$output->replace("share-form", "");
-				} catch (ShareException $exception) {
-					$status = Config::TEXT_DELETE["error"] . " (" . $exception->getMessage() . ")";
-					// TODO: Remove exception usage
+				} else {
+					$status = Config::TEXT_DELETE["error"];
 				}
 			} else {
-				$status = Config::TEXT_DELETE["errorInput"];
+				$status = Config::TEXT_DELETE["error_input"];
 			}
 		}
 		$output->replace("share-status", $status, "xml");

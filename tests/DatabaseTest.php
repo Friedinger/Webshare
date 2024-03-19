@@ -21,9 +21,4 @@ final class DatabaseTest extends TestCase
 		$expectedColumns = ["uri", "type", "value", "password", "expireDate", "createDate"];
 		$this->assertEquals($expectedColumns, array_column($tableColumns, "COLUMN_NAME"));
 	}
-	public function testException()
-	{
-		$this->expectException(DatabaseException::class);
-		Database::query("SELECT * FROM nonExistentTable");
-	}
 }
