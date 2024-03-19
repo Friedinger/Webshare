@@ -24,7 +24,11 @@ final class Share
 	{
 		$this->uri = $uri;
 		$this->type = $type;
-		$this->value = $value;
+		if ($this->type == "link" && !preg_match("/^[a-zA-Z]+:\/\//", $value)) {
+			$this->value = "https://" . $value;
+		} else {
+			$this->value = $value;
+		}
 		$this->password = $password;
 		if ($password && !password_get_info($password)["algo"]) {
 			$this->password = password_hash($password, PASSWORD_DEFAULT);
@@ -95,7 +99,6 @@ final class Share
 
 	private function redirectLink(): bool
 	{
-		// TODO: Add support for other protocols and default to https
 		header("Location:" . $this->value);
 		return true;
 	}
