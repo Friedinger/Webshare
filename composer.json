@@ -3,7 +3,7 @@
 	"description": "A simple, lightweight, self hosted webservice to easily share files and links via an short custom URL.",
 	"license": "MIT",
 	"require-dev": {
-		"phpunit/phpunit": "^11",
+		"phpunit/phpunit": "^10",
 		"infection/infection": "^0.28.1"
 	},
 	"config": {
