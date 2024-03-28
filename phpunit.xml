@@ -4,7 +4,9 @@
          processIsolation="true"
          executionOrder="random"
          resolveDependencies="true"
->
+         colors="true"
+         testdox="true"
+    >
     <testsuites>
         <testsuite name="Webshare Tests">
             <directory>./tests</directory>

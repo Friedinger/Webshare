@@ -13,7 +13,9 @@ final class IndexTest extends TestCase
 	}
 	public function testIndex()
 	{
+		ob_start();
 		require_once($_SERVER["DOCUMENT_ROOT"] . "index.php");
+		ob_end_clean();
 		$this->assertIsObject($webshare);
 	}
 }

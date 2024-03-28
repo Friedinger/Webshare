@@ -27,8 +27,10 @@ final class ConfigTest extends TestCase
 	}
 	public function testFunctions()
 	{
+		ob_start();
 		$this->assertNull(Config::error404());
 		$this->assertIsBool(Config::adminAccess());
 		$this->assertNull(Config::noAdminAccess());
+		ob_end_clean();
 	}
 }
