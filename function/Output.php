@@ -26,12 +26,8 @@ final class Output
 		}
 	}
 
-	public function print(Share $share = null): void
+	public function print(): void
 	{
-		// TODO: Remove the if statement and use the replaceCommon method
-		if ($share) {
-			$this->replaceCommon($share);
-		}
 		echo $this->dom->saveHTML();
 	}
 
