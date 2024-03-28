@@ -11,7 +11,6 @@ final class DatabaseTest extends TestCase
 		$_SERVER["DOCUMENT_ROOT"] = __DIR__ . "/../home/";
 		require_once($_SERVER["DOCUMENT_ROOT"] . "/../config/webshareConfig.php");
 		require_once($_SERVER["DOCUMENT_ROOT"] . "/../function/Database.php");
-		require_once($_SERVER["DOCUMENT_ROOT"] . "/../function/Exception.php");
 	}
 	public function testTable()
 	{

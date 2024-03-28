@@ -1,6 +1,9 @@
-.*
 /.vscode
 notes.md
+.*
+
 /vendor
+infection.html
+
 config/*
 !config/*_sample.*

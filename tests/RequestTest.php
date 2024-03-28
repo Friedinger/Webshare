@@ -105,4 +105,35 @@ final class RequestTest extends TestCase
 		$this->assertEquals("value2", $_SESSION["test1"]["test2"]);
 		$this->assertEquals("value2", Request::session("test1", "test2"));
 	}
+
+	public function testProtocol()
+	{
+		// Test HTTP protocol
+		$_SERVER["REQUEST_SCHEME"] = "http";
+		$this->assertEquals("http", Request::protocol());
+
+		// Test HTTPS protocol
+		$_SERVER["REQUEST_SCHEME"] = "https";
+		$this->assertEquals("https", Request::protocol());
+	}
+
+	public function testHttpHost()
+	{
+		// Test HTTP Host
+		$_SERVER["HTTP_HOST"] = "localhost";
+		$this->assertEquals("localhost", Request::httpHost());
+	}
+
+	public function testBaseUrl()
+	{
+		// Test Base URL with HTTP
+		$_SERVER["REQUEST_SCHEME"] = "http";
+		$_SERVER["HTTP_HOST"] = "localhost";
+		$this->assertEquals("http://localhost/install/", Request::baseUrl());
+
+		// Test Base URL with HTTPS
+		$_SERVER["REQUEST_SCHEME"] = "https";
+		$_SERVER["HTTP_HOST"] = "localhost";
+		$this->assertEquals("https://localhost/install/", Request::baseUrl());
+	}
 }
