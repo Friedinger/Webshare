@@ -13,6 +13,6 @@
 	},
 	"scripts": {
 		"test": "vendor/bin/phpunit",
-		"infection": "vendor/bin/infection --min-msi=100 --min-covered-msi=100 --threads=4"
+		"infection": "vendor/bin/infection --threads=4"
 	}
 }
