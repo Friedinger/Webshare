@@ -76,6 +76,21 @@ final class RequestTest extends TestCase
 		$this->assertEquals("&lt;script&gt;alert(&#039;XSS&#039;);&lt;/script&gt;", Request::post("param1"));
 	}
 
+	public function testFile()
+	{
+		// Test accessing non-existent file
+		$_FILES = [];
+		$this->assertNull(Request::file("file1"));
+
+		// Test accessing existing file
+		$_FILES = ["file1" => ["name" => "test.txt"]];
+		$this->assertEquals(["name" => "test.txt"], Request::file("file1"));
+
+		// Test accessing nested file
+		$_FILES = ["file1" => ["file2" => ["name" => "test.txt"]]];
+		$this->assertEquals(["name" => "test.txt"], Request::file("file1", "file2"));
+	}
+
 	public function testSession()
 	{
 		// Test accessing non-existent session key
