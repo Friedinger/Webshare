@@ -61,22 +61,21 @@ final class Request
 		return $session;
 	}
 
-	public static function setSession(mixed $value, string ...$keys): bool
+	public static function setSession(mixed $value, string ...$keys): void
 	{
-		return self::setNestedSession($_SESSION, $keys, $value);
+		self::setNestedSession($_SESSION, $keys, $value);
 	}
 
-	private static function setNestedSession(array &$session, array $keys, mixed $value): bool
+	private static function setNestedSession(array &$session, array $keys, mixed $value): void
 	{
 		$key = array_shift($keys);
 		if (empty($keys)) {
 			$session[$key] = $value;
-			return $session[$key] === $value;
 		} else {
 			if (!isset($session[$key]) || !is_array($session[$key])) {
 				$session[$key] = [];
 			}
-			return self::setNestedSession($session[$key], $keys, $value);
+			self::setNestedSession($session[$key], $keys, $value);
 		}
 	}
 
