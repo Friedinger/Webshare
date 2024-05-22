@@ -101,7 +101,7 @@ final class Page
 		}
 		$output = new Output(Config::PATH_PASSWORD);
 		$output->replace("share-status", $status, "xml");
-		$output->replaceCommon($share);
+		$output->replaceCommon();
 		$output->print();
 		return true;
 	}

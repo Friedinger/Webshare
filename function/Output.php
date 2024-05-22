@@ -49,8 +49,11 @@ final class Output
 		$this->replaceAttributes($tag, $content ?? "");
 	}
 
-	public function replaceCommon(Share $share): void
+	public function replaceCommon(Share $share = null): void
 	{
+		$this->replace("share-installPath", Config::INSTALL_PATH);
+		$this->replace("share-adminLink", Config::ADMIN_LINK);
+		if (is_null($share)) return;
 		$this->replace("share-uri", $share->uri());
 		$this->replace("share-type", $share->type());
 		$this->replace("share-value", $share->value());
@@ -59,8 +62,6 @@ final class Output
 		$this->replace("share-create", $share->createDate());
 		$this->replace("share-url", Config::INSTALL_PATH . $share->uri());
 		$this->replace("share-urlFull", Request::baseUrl() . $share->uri());
-		$this->replace("share-installPath", Config::INSTALL_PATH);
-		$this->replace("share-adminLink", Config::ADMIN_LINK);
 	}
 
 	private function replaceNodes(string $tag, string|null $content, string $type = "text"): void
