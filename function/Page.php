@@ -31,6 +31,7 @@ final class Page
 			$output->replace("share-list", $content, "xml");
 			$output->replaceCommon($share);
 		}
+		$output->replace("share-list", "");
 		$output->replaceCommon();
 		$output->print();
 		return true;
