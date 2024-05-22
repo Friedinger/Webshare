@@ -31,7 +31,7 @@ final class Page
 			$output->replace("share-list", $content, "xml");
 			$output->replaceCommon($share);
 		}
-		$output->replaceCommon($share);
+		$output->replaceCommon();
 		$output->print();
 		return true;
 	}
@@ -101,7 +101,7 @@ final class Page
 		}
 		$output = new Output(Config::PATH_PASSWORD);
 		$output->replace("share-status", $status, "xml");
-		$output->replaceCommon();
+		$output->replaceCommon($share);
 		$output->print();
 		return true;
 	}
