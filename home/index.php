@@ -1,5 +1,17 @@
 <?php
 
+/*
+
+Webshare
+A simple, lightweight, self hosted webservice to easily share files and links via an short custom URL.
+
+by Friedinger (friedinger.org)
+
+Version: 3.0.3
+
+*/
+
+
 require_once $_SERVER["DOCUMENT_ROOT"] . "/../config/webshareConfig.php"; // Include webshare configuration
 require_once $_SERVER["DOCUMENT_ROOT"] . "/../function/Webshare.php"; // Include main webshare class
 
