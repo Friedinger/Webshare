@@ -11,74 +11,119 @@ by Friedinger (friedinger.org)
 
 namespace Webshare;
 
-final class Request
+/**
+ * Class Request
+ *
+ * Contains functions to get information and data from the current request.
+ */
+class Request
 {
+	/**
+	 * Returns the URI of the current request.
+	 * Removes special characters, parameters, trailing slash, index.php, and start slash.
+	 *
+	 * @return string The URI of the current request.
+	 */
 	public static function uri(): string
 	{
-		$uri = $_SERVER["REQUEST_URI"];
-		$uri = htmlspecialchars(strtolower(urldecode($uri))); // Remove special chars from request
-		$uri = explode(Config::INSTALL_PATH, $uri, 2)[1]; // Remove install path
-		$uri = parse_url($uri, PHP_URL_PATH); // Remove parameters
-		$uri = rtrim($uri, "/") . "/"; // Force trailing slash
-		$uri = "/" . ltrim($uri, "/"); // Force start slash
-		$uri = str_replace("/index.php/", "", $uri); // Remove index.php
-		$uri = rtrim($uri, "/"); // Remove trailing slash
-		$uri = ltrim($uri, "/"); // Remove start slash
-		return htmlspecialchars($uri);
+		$uri = $_SERVER["REQUEST_URI"]; // Get request URI from server
+		return Misc::prepareUri($uri); // Prepare URI
 	}
 
+	/**
+	 * Returns the value of a GET parameter.
+	 * If the value is empty, null is returned.
+	 *
+	 * @param string $key The key of the GET parameter.
+	 * @return string|null The value of the GET parameter if it exists, null otherwise.
+	 */
 	public static function get(string $key): string|null
 	{
-		$get = $_GET[$key] ?? null;
-		if (empty($get)) return null;
-		return htmlspecialchars($get);
+		$value = $_GET[$key] ?? null; // Get value from GET array
+		if (!is_null($value)) $value = htmlspecialchars($value); // Remove special chars from value if it exists
+		return $value;
 	}
 
+	/**
+	 * Returns the value of a POST parameter.
+	 * If the value is empty, null is returned.
+	 *
+	 * @param string $key The key of the POST parameter.
+	 * @return string|null The value of the POST parameter if it exists, null otherwise.
+	 */
 	public static function post(string $key): string|null
 	{
-		$post = $_POST[$key] ?? null;
-		if (empty($post)) return null;
-		return htmlspecialchars($post);
+		$value = $_POST[$key] ?? null; // Get value from POST array
+		if (!is_null($value)) $value = htmlspecialchars($value); // Remove special chars from value if it exists
+		return $value;
 	}
 
+	/**
+	 * Returns a value in the $_FILES array.
+	 * If the value is empty, null is returned.
+	 *
+	 * @param string ...$keys The keys to access the file value in the $_FILES array.
+	 * @return mixed|null The value of the file if found, null otherwise.
+	 */
 	public static function file(string ...$keys): mixed
 	{
 		$file = $_FILES;
 		foreach ($keys as $key) {
-			if (!isset($file[$key])) return null;
-			$file = $file[$key];
+			if (!isset($file[$key])) return null; // Break if key does not exist
+			$file = $file[$key]; // Get value from FILES array or go deeper
 		}
 		return $file;
 	}
 
+	/**
+	 * Returns a value in the $_SESSION array.
+	 * If the value is empty, null is returned.
+	 *
+	 * @param string ...$keys The keys to access the session value in the $_SESSION array.
+	 * @return mixed|null The value of the session if found, null otherwise.
+	 */
 	public static function session(string ...$keys): mixed
 	{
 		$session = $_SESSION;
 		foreach ($keys as $key) {
-			if (!isset($session[$key])) return null;
-			$session = $session[$key];
+			if (!isset($session[$key])) return null; // Break if key does not exist
+			$session = $session[$key]; // Get value from SESSION array or go deeper
 		}
 		return $session;
 	}
 
-	public static function setSession(mixed $value, string ...$keys): void
+	/**
+	 * Sets a value in the $_SESSION array.
+	 * Returns true if the value is set, false otherwise.
+	 *
+	 * @param mixed $value The value to set in the $_SESSION array.
+	 * @param string ...$keys The keys to access the session value in the $_SESSION array.
+	 * @return bool True if the value is set, false otherwise.
+	 */
+	public static function setSession(mixed $value, string ...$keys): bool
 	{
-		self::setNestedSession($_SESSION, $keys, $value);
+		return self::setSessionNested($_SESSION, $keys, $value); // Call nested function to set session value
 	}
 
-	private static function setNestedSession(array &$session, array $keys, mixed $value): void
+	private static function setSessionNested(array &$session, array $keys, mixed $value): bool
 	{
-		$key = array_shift($keys);
+		$key = array_shift($keys); // Get next key
 		if (empty($keys)) {
-			$session[$key] = $value;
+			$session[$key] = $value; // Set value if no more keys
+			return $session[$key] === $value; // Return true if value is set
 		} else {
 			if (!isset($session[$key]) || !is_array($session[$key])) {
-				$session[$key] = [];
+				$session[$key] = []; // Create array if key does not exist or is not an array
 			}
-			self::setNestedSession($session[$key], $keys, $value);
+			return self::setSessionNested($session[$key], $keys, $value); // Call nested function to set session value
 		}
 	}
 
+	/**
+	 * Returns the protocol used for the current request.
+	 *
+	 * @return string The protocol used for the current request. It can be either "http" or "https".
+	 */
 	public static function protocol(): string
 	{
 		if ((!empty($_SERVER["REQUEST_SCHEME"]) && $_SERVER["REQUEST_SCHEME"] == "https") ||
@@ -89,15 +134,5 @@ final class Request
 		} else {
 			return "http";
 		}
-	}
-
-	public static function httpHost(): string
-	{
-		return $_SERVER["HTTP_HOST"];
-	}
-
-	public static function baseUrl(): string
-	{
-		return self::protocol() . "://" . self::httpHost() . Config::INSTALL_PATH;
 	}
 }

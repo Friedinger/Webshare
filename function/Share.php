@@ -11,7 +11,7 @@ by Friedinger (friedinger.org)
 
 namespace Webshare;
 
-final class Share
+class Share
 {
 	private string $uri;
 	private string $type;

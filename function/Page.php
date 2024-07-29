@@ -170,7 +170,7 @@ final class Page
 		$output->replaceAllSafe("share-expire", $share->expireDate() ?? Config::TEXT_OUTPUT["noExpireDate"]);
 		$output->replaceAllSafe("share-create", $share->createDate() ?? "");
 		$output->replaceAllSafe("share-url", Config::INSTALL_PATH . $share->uri());
-		$output->replaceAllSafe("share-urlFull", Request::baseUrl() . $share->uri());
+		$output->replaceAllSafe("share-urlFull", Misc::baseUrl() . $share->uri());
 		return $output;
 	}
 }

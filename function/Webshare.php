@@ -13,7 +13,7 @@ Version: 3.0.2
 
 namespace Webshare;
 
-final class Webshare
+class Webshare
 {
 	public function __construct()
 	{
@@ -53,7 +53,7 @@ final class Webshare
 			if (str_starts_with($class, __NAMESPACE__ . "\\")) {
 				$class = str_replace(__NAMESPACE__ . "\\", "", $class);
 			}
-			require_once("{$class}.php");
+			require_once "{$class}.php";
 		});
 	}
 }
