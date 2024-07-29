@@ -19,20 +19,20 @@ final class Page
 			Config::noAdminAccess();
 			return false;
 		}
-		$output = new Output(Config::PATH_ADMIN);
+		$output = new Output($_SERVER["DOCUMENT_ROOT"] . Config::PATH_ADMIN);
 		$status = Config::TEXT_ADMIN["default"];
 		if (Request::post("submit")) {
 			$status = self::adminSubmit();
 		}
-		$output->replace("share-status", $status, "xml");
+		$output->replaceAll("share-status", $status);
 		$shares = Share::list(Request::get("sort") ?? "createDate");
 		$content = $output->getContent("share-list") . "<share-list />";
 		foreach ($shares as $share) {
-			$output->replace("share-list", $content, "xml");
-			$output->replaceCommon($share);
+			$output->replaceAll("share-list", $content);
+			$output = self::replaceCommon($output, $share);
 		}
-		$output->replace("share-list", "");
-		$output->replaceCommon();
+		$output->replaceAll("share-list", "");
+		$output = self::replaceCommon($output);
 		$output->print();
 		return true;
 	}
@@ -62,27 +62,28 @@ final class Page
 		$store = $share->store();
 		if (!$store) return Config::TEXT_ADMIN["error_store"];
 		$output = new Output(Config::TEXT_ADMIN["success"], true);
-		$output->replaceCommon($store);
+		$output = self::replaceCommon($output, $share);
 		return $output->getContent();
 	}
 
 	public static function view($share): bool
 	{
-		$output = new Output(Config::PATH_VIEW);
+		$output = new Output($_SERVER["DOCUMENT_ROOT"] . Config::PATH_VIEW);
 		$file = $_SERVER["DOCUMENT_ROOT"] . Config::PATH_STORAGE . $share->uri();
 		$mime = mime_content_type($file);
 		if (str_starts_with($mime, "text/")) {
-			$output->replace("share-preview", htmlspecialchars(str_replace("\n", "<br>", file_get_contents($file))), "code");
+			$replace = "<code>" . str_replace("\n", "<br>", htmlspecialchars(file_get_contents($file))) . "</code>";
 		} elseif (str_starts_with($mime, "image/")) {
-			$output->replace("share-preview", $share->value(), "img");
+			$replace = "<img src='" . $share->uri() . "?action=view' alt='" . $share->value() . "' />";
 		} elseif (str_starts_with($mime, "audio/")) {
-			$output->replace("share-preview", $share->value(), "audio");
+			$replace = "<audio controls><source src='" . $share->uri() . "?action=view' type='" . $mime . "' alt='" . $share->value() . "'></audio>";
 		} elseif (str_starts_with($mime, "video/")) {
-			$output->replace("share-preview", $share->value(), "video");
+			$replace = "<video controls><source src='" . $share->uri() . "?action=view' type='" . $mime . "' alt='" . $share->value() . "'></video>";
 		} else {
-			$output->replace("share-preview", $share->value(), "iframe");
+			$replace = "<iframe src='" . $share->uri() . "?action=view' alt='" . $share->value() . "'></iframe>";
 		}
-		$output->replaceCommon($share);
+		$output->replaceAll("share-preview", $replace);
+		$output = self::replaceCommon($output, $share);
 		$output->print();
 		return true;
 	}
@@ -100,9 +101,9 @@ final class Page
 			}
 			$status = Config::TEXT_PASSWORD["incorrect"];
 		}
-		$output = new Output(Config::PATH_PASSWORD);
-		$output->replace("share-status", $status, "xml");
-		$output->replaceCommon($share);
+		$output = new Output($_SERVER["DOCUMENT_ROOT"] . Config::PATH_PASSWORD);
+		$output->replaceAll("share-status", $status);
+		$output = self::replaceCommon($output, $share);
 		$output->print();
 		return true;
 	}
@@ -111,13 +112,13 @@ final class Page
 	{
 		if (!Config::adminAccess()) return false;
 		$status = "";
-		$output = new Output(Config::PATH_DELETE);
+		$output = new Output($_SERVER["DOCUMENT_ROOT"] . Config::PATH_DELETE);
 		if (Request::post("submit")) {
 			if (Request::post("uri") == $share->uri()) {
 				$delete = $share->delete();
 				if ($delete) {
 					$status = Config::TEXT_DELETE["success"];
-					$output->replace("share-form", "");
+					$output->replaceAll("share-form", "");
 				} else {
 					$status = Config::TEXT_DELETE["error"];
 				}
@@ -125,8 +126,8 @@ final class Page
 				$status = Config::TEXT_DELETE["error_input"];
 			}
 		}
-		$output->replace("share-status", $status, "xml");
-		$output->replaceCommon($share);
+		$output->replaceAll("share-status", $status);
+		$output = self::replaceCommon($output, $share);
 		$output->print();
 		return true;
 	}
@@ -154,5 +155,22 @@ final class Page
 			readfile($file);
 		}
 		return true;
+	}
+
+	private static function replaceCommon(Output $output, Share $share = null): Output
+	{
+		$output->replaceAllSafe("share-installPath", Config::INSTALL_PATH);
+		$output->replaceAllSafe("share-adminLink", Config::ADMIN_LINK);
+		if (is_null($share)) return $output;
+
+		$output->replaceAllSafe("share-uri", $share->uri());
+		$output->replaceAllSafe("share-type", $share->type());
+		$output->replaceAllSafe("share-value", $share->value());
+		$output->replaceAllSafe("share-password", $share->password() ? Config::TEXT_OUTPUT["passwordIsSet"] : Config::TEXT_OUTPUT["passwordNotSet"]);
+		$output->replaceAllSafe("share-expire", $share->expireDate() ?? Config::TEXT_OUTPUT["noExpireDate"]);
+		$output->replaceAllSafe("share-create", $share->createDate() ?? "");
+		$output->replaceAllSafe("share-url", Config::INSTALL_PATH . $share->uri());
+		$output->replaceAllSafe("share-urlFull", Request::baseUrl() . $share->uri());
+		return $output;
 	}
 }

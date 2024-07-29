@@ -149,34 +149,39 @@ final class Share
 
 	public function uri(): string
 	{
-		return $this->uri;
+		return htmlspecialchars($this->uri);
 	}
 
 	public function type(): string
 	{
-		return $this->type;
+		return htmlspecialchars($this->type);
 	}
 
 	public function value(): string
 	{
-		return $this->value;
+		return htmlspecialchars($this->value);
 	}
 
 	public function password($inputPassword = null): bool
 	{
-		if (isset($inputPassword)) {
+		if (is_null($inputPassword)) {
+			// Check if share has password set
+			return isset($this->password);
+		} else {
+			// Verify entered password
 			return password_verify($inputPassword, $this->password);
 		}
-		return isset($this->password);
 	}
 
 	public function expireDate(): string|null
 	{
-		return $this->expireDate;
+		if (is_null($this->expireDate)) return null;
+		return htmlspecialchars($this->expireDate);
 	}
 
 	public function createDate(): string|null
 	{
-		return $this->createDate;
+		if (is_null($this->createDate)) return null;
+		return htmlspecialchars($this->createDate);
 	}
 }
