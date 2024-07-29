@@ -14,7 +14,12 @@ namespace Webshare;
 use PDO;
 use PDOStatement;
 
-final class Database
+/**
+ * Class Database
+ *
+ * Contains functions to connect to and query the database.
+ */
+class Database
 {
 	private static PDO $connection;
 
@@ -29,13 +34,21 @@ final class Database
 		self::$connection = new PDO($dsn, Config::DB_USERNAME, Config::DB_PASSWORD, $options);
 	}
 
+	/**
+	 * Executes a database query with optional parameters.
+	 * Connects to the database if no connection exists.
+	 *
+	 * @param string $query The SQL query to execute.
+	 * @param array $params An array of parameters to bind to the query.
+	 * @return PDOStatement The executed PDOStatement object.
+	 */
 	public static function query(string $query, array $params = []): PDOStatement
 	{
 		if (!isset(self::$connection)) {
-			self::connect();
+			self::connect(); // Connect to database if no connection exists
 		}
-		$statement = self::$connection->prepare($query);
-		$statement->execute($params);
-		return $statement;
+		$statement = self::$connection->prepare($query); // Prepare query
+		$statement->execute($params); // Execute query with parameters
+		return $statement; // Return PDOStatement object
 	}
 }

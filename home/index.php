@@ -1,8 +1,9 @@
 <?php
 
-require_once($_SERVER["DOCUMENT_ROOT"] . "/../config/webshareConfig.php");
-require_once($_SERVER["DOCUMENT_ROOT"] . "/../function/Webshare.php");
+require_once $_SERVER["DOCUMENT_ROOT"] . "/../config/webshareConfig.php"; // Include webshare configuration
+require_once $_SERVER["DOCUMENT_ROOT"] . "/../function/Webshare.php"; // Include main webshare class
 
+// Start session if not already started, can be removed if session is started elsewhere
 if (session_id() == "") {
 	session_set_cookie_params([
 		"secure" => true,
@@ -13,4 +14,4 @@ if (session_id() == "") {
 	session_start();
 }
 
-$webshare = new Webshare\Webshare();
+$webshare = new Webshare\Webshare(); // Start webshare
