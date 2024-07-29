@@ -27,6 +27,7 @@ class Request
 	public static function uri(): string
 	{
 		$uri = $_SERVER["REQUEST_URI"]; // Get request URI from server
+		$uri = explode(Config::INSTALL_PATH, $uri, 2)[1]; // Remove install path
 		return Misc::prepareUri($uri); // Prepare URI
 	}
 
