@@ -1,9 +1,27 @@
-/.vscode
-notes.md
-.*
+# IDE-specific files
+.vscode/
+.idea/
 
-/vendor
-infection.html
+# OS-specific files
+Thumbs.db
+.DS_Store
 
+# Dependency directories
+node_modules/
+vendor/
+
+# Build artifacts
+dist/
+build/
+
+# Configuration files
 config/*
 !config/*_sample.*
+.env
+*.local
+
+# Log files
+*.log
+
+# Local testing files
+*test/
