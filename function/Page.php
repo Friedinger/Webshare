@@ -100,21 +100,22 @@ class Page
 
 		// Replace share preview based on MIME type
 		$mime = mime_content_type($share->filePath()); // Get MIME type of file
+		$src = Config::INSTALL_PATH . $share->uri() . "/?action=view"; // Get source URL for file
 		if (str_starts_with($mime, "text/")) {
 			// Text file displayed as code
 			$replace = "<code>" . str_replace("\n", "<br>", htmlspecialchars(file_get_contents($share->filePath()))) . "</code>";
 		} elseif (str_starts_with($mime, "image/")) {
 			// Image file
-			$replace = "<img src='" . $share->uri() . "?action=view' alt='" . $share->value() . "' />";
+			$replace = "<img src='" . $src . "' alt='" . $share->value() . "' />";
 		} elseif (str_starts_with($mime, "audio/")) {
 			// Audio file
-			$replace = "<audio controls><source src='" . $share->uri() . "?action=view' type='" . $mime . "' alt='" . $share->value() . "'></audio>";
+			$replace = "<audio controls><source src='" . $src . "' type='" . $mime . "' alt='" . $share->value() . "'></audio>";
 		} elseif (str_starts_with($mime, "video/")) {
 			// Video file
-			$replace = "<video controls><source src='" . $share->uri() . "?action=view' type='" . $mime . "' alt='" . $share->value() . "'></video>";
+			$replace = "<video controls><source src='" . $src . "' type='" . $mime . "' alt='" . $share->value() . "'></video>";
 		} else {
 			// Default file displayed as iframe
-			$replace = "<iframe src='" . $share->uri() . "?action=view' alt='" . $share->value() . "'></iframe>";
+			$replace = "<iframe src='" . $src . "' alt='" . $share->value() . "'></iframe>";
 		}
 		$output->replaceAll("share-preview", $replace); // Replace share preview with file content in html frame
 
