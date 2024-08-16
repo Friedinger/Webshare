@@ -139,7 +139,7 @@ class Page
 		if (Request::post("submit")) {
 			$inputPassword = Request::post("password") ?? ""; // Get input password
 			if ($share->password($inputPassword)) { // Check if input password is correct
-				Request::setSession("webshare", $share->uri(), true); // Set session to remember password
+				Request::setSession(true, "webshare", $share->uri()); // Set session to remember password
 				return false; // Return false to redirect to share
 			} else {
 				$status = Config::TEXT_PASSWORD["incorrect"]; // Set incorrect password status message
