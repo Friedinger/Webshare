@@ -59,7 +59,7 @@ class Page
 	private static function adminSubmit(): string
 	{
 		// Validate URI
-		if (!Request::post("uri")) return Config::TEXT_ADMIN["error_uri_empty"]; // Return error message if URI is empty
+		if (empty(Request::post("uri"))) return Config::TEXT_ADMIN["error_uri_empty"]; // Return error message if URI is empty
 		$share = Share::get(Request::post("uri")); // Get share based on URI
 		if (!is_null($share)) return Config::TEXT_ADMIN["error_uri_used"]; // Return error message if URI is already used
 
@@ -77,7 +77,7 @@ class Page
 		}
 
 		// Store share
-		$share = new Share(Request::post("uri"), $type, $value, Request::post("password"), Request::post("expireDate")); // Create new share object
+		$share = new Share(Request::post("uri"), $type, $value, Request::post("password") ?: null, Request::post("expireDate") ?: null); // Create new share object
 		$store = $share->store(); // Store share in database
 		if (!$store) return Config::TEXT_ADMIN["error_store"]; // Return error message if share could not be stored
 
