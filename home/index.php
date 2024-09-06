@@ -7,7 +7,7 @@ A simple, lightweight, self hosted webservice to easily share files and links vi
 
 by Friedinger (friedinger.org)
 
-Version: 3.0.6
+Version: 3.1.0
 
 */
 
