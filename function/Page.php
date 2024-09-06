@@ -58,9 +58,10 @@ class Page
 	private static function adminSubmit(): string
 	{
 		// Validate URI
-		if (empty(Request::post("uri"))) return Config::TEXT_ADMIN["error_uri_empty"]; // Return error message if URI is empty
+		if (empty(Request::post("uri"))) return Config::TEXT_ADMIN["error_uri_empty"]; // Check if URI is not empty
+		if (Request::post("uri") == Config::ADMIN_LINK) return Config::TEXT_ADMIN["error_uri_used"]; // Check if URI is not link to admin page
 		$share = Share::get(Request::post("uri")); // Get share based on URI
-		if (!is_null($share)) return Config::TEXT_ADMIN["error_uri_used"]; // Return error message if URI is already used
+		if (!is_null($share)) return Config::TEXT_ADMIN["error_uri_used"]; // Check if URI is not already used
 
 		// Validate type and set share type and value based on input
 		if (Request::post("link") && !Request::file("file", "size")) { // Link input without file upload -> link share
