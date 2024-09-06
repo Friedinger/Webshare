@@ -5,6 +5,8 @@
 Webshare
 A simple, lightweight, self hosted webservice to easily share files and links via an short custom URL.
 
+https://github.com/Friedinger/Webshare
+
 by Friedinger (friedinger.org)
 
 */
