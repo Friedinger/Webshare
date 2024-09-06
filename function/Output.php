@@ -1,5 +1,14 @@
 <?php
 
+/*
+
+Webshare
+A simple, lightweight, self hosted webservice to easily share files and links via an short custom URL.
+
+by Friedinger (friedinger.org)
+
+*/
+
 namespace Webshare;
 
 use DOMDocument;
@@ -40,8 +49,7 @@ class Output
 			// Get content from file without processing php
 			$output = file_get_contents($content);
 		}
-
-		$output = mb_convert_encoding($output, "HTML-ENTITIES", "UTF-8");
+		$output = mb_encode_numericentity($output, [0x80, 0x10FFFF, 0, ~0], "UTF-8");
 		$this->dom->loadHTML($output, LIBXML_NOERROR); // Load html content into dom
 	}
 
@@ -143,7 +151,7 @@ class Output
 			$dom = $domNew;
 		}
 		$content = $dom->saveHTML(); // Save html content from dom
-		$content = mb_convert_encoding($content, "HTML-ENTITIES", "UTF-8");
+		$content = mb_encode_numericentity($content, [0x80, 0x10FFFF, 0, ~0], "UTF-8");
 		$content = str_replace("%20", " ", $content);
 		return trim($content); // Return html content as string
 	}
@@ -192,7 +200,7 @@ class Output
 		foreach ($nodes as $node) { // Iterate over nodes with attributes containing tag
 			foreach ($node->attributes as $attribute) {
 				// Replace tag with content in attribute value
-				$attribute->value = str_ireplace(["<{$tag}></{$tag}>", "<{$tag} />", "<{$tag}/>"], $content, $attribute->value);
+				$attribute->value = str_ireplace(["<{$tag}></{$tag}>", "<{$tag} />", "<{$tag}/>", "<{$tag}>"], $content, $attribute->value);
 			}
 		}
 	}
@@ -205,7 +213,7 @@ class Output
 		}
 
 		$valueDom = new DOMDocument();
-		$valueDom->loadHTML(mb_convert_encoding($value, 'HTML-ENTITIES', 'UTF-8'), LIBXML_NOERROR); // Load html value into dom
+		$valueDom->loadHTML(mb_encode_numericentity($value, [0x80, 0x10FFFF, 0, ~0], "UTF-8"), LIBXML_NOERROR); // Load html value into dom
 		$importedNodes = [];
 		foreach ($valueDom->getElementsByTagName("body")->item(0)->childNodes as $child) {
 			array_push($importedNodes, $this->dom->importNode($child, true)); // Import nodes from value dom to main dom and add to array
