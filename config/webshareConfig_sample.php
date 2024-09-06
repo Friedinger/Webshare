@@ -81,11 +81,9 @@ class Config
 	public static function adminAccess(): bool
 	{
 		// Control authentication to protect admin page, return true if authenticated
-		return true; // Just for development, should be set by login script
-	}
-	public static function noAdminAccess(): void
-	{
-		// Action if admin page was requested, but is not allowed
-		echo "<h1>Forbidden</h1>No access to the requested page.";
+		// Returning false stops Webshare, so display error page before, e.g. with error404()
+		$adminAccess = true; // Just for development, should be set by login script
+		if (!$adminAccess) self::error404();
+		return $adminAccess;
 	}
 }

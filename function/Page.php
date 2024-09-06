@@ -27,8 +27,7 @@ class Page
 	{
 		// Check if user has admin access
 		if (!Config::adminAccess()) {
-			Config::noAdminAccess();
-			return false; // Return false if user has no admin access
+			return true; // Return if user has no admin access and stop webshare
 		}
 
 		// Load admin page
