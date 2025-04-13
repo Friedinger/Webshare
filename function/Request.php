@@ -87,6 +87,7 @@ class Request
 	 */
 	public static function session(string ...$keys): mixed
 	{
+		if (!isset($_SESSION)) return null;
 		$session = $_SESSION;
 		foreach ($keys as $key) {
 			if (!isset($session[$key])) return null; // Break if key does not exist
