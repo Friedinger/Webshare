@@ -13,7 +13,9 @@ by Friedinger (friedinger.org)
 
 namespace Webshare;
 
+
 use DOMDocument;
+use DOMElement;
 use DOMNode;
 use DOMXPath;
 
@@ -123,7 +125,7 @@ class Output
 		$replacement = $this->importNodes($content); // Import nodes from content
 		foreach ($nodeList as $node) {
 			$newNode = $this->dom->createElement($tag); // Create new node with tag
-			self::copyNodeAttributes($node, $newNode); // Copy attributes from old node to new node
+			$this->copyNodeAttributes($node, $newNode); // Copy attributes from old node to new node
 			foreach ($replacement as $child) {
 				$newNode->appendChild($child->cloneNode(true)); // Append content as html nodes to new node
 			}
@@ -131,50 +133,16 @@ class Output
 		}
 	}
 
-	/**
-	 * Retrieves the content of a specific HTML node.
-	 * Gets the content of the first node with the specified tag name.
-	 *
-	 * @param string|null $tagName The name of the HTML tag to retrieve the content from. If null, the root tag name will be used.
-	 * @return string|null The content of the HTML node as a string, or null if the node does not exist.
-	 */
-	public function getContent(string ...$tags): string|null
+	private function copyNodeAttributes($oldNode, DOMElement $newNode): void
 	{
-		if (is_null($tags)) $tags = [$this->dom->documentElement->tagName]; // Get root tag name if no tag name is given
-
-		$dom = $this->dom;
-		foreach ($tags as $tag) {
-			$node = $dom->getElementsByTagName($tag)->item(0); // Get first node with tag name
-			if (!$node) return null;
-			$domNew = new DOMDocument();
-			foreach ($node->childNodes as $child) {
-				$domNew->appendChild($domNew->importNode($child, true)); // Import child nodes to new dom
-			}
-			$dom = $domNew;
+		if ($newNode->nodeType == XML_TEXT_NODE || $newNode->nodeType == XML_DOCUMENT_FRAG_NODE) {
+			return; // Skip text nodes
 		}
-		$content = $dom->saveHTML(); // Save html content from dom
-		$content = mb_encode_numericentity($content, [0x80, 0x10FFFF, 0, ~0], "UTF-8");
-		$content = str_replace("%20", " ", $content);
-		return trim($content); // Return html content as string
-	}
-
-	/**
-	 * Retrieves the content of a specified HTML node and returns it as an array.
-	 * Gets the content of the first node with the specified tag name.
-	 * The content is returned as an associative array with the tag names as keys.
-	 * If the node contains text content, it is stored under the key "text".
-	 *
-	 * @param string|null $tagName The name of the HTML tag to retrieve the content from. If not provided, the root tag name will be used.
-	 * @return array The content of the HTML node as an array.
-	 */
-	public function getNodeContentArray(string $tagName = null): array
-	{
-		if (is_null($tagName)) $tagName = $this->dom->documentElement->tagName; // Get root tag name if no tag name is given
-
-		$node = $this->dom->getElementsByTagName($tagName)->item(0); // Get first node with tag name
-		if (!$node) return [];
-
-		return $this->getNodeContentArrayRecursive($node); // Return content as array by getting content recursively
+		if ($oldNode->hasAttributes()) {
+			foreach ($oldNode->attributes as $attribute) {
+				$newNode->setAttribute($attribute->name, $attribute->value); // Copy attributes from old node to new node
+			}
+		}
 	}
 
 	private function replaceNode(string $tag, string $content): void
@@ -215,41 +183,156 @@ class Output
 		}
 
 		$valueDom = new DOMDocument();
-		$valueDom->loadHTML(mb_encode_numericentity($value, [0x80, 0x10FFFF, 0, ~0], "UTF-8"), LIBXML_NOERROR); // Load html value into dom
+		$valueDom->loadHTML(mb_encode_numericentity("<html>" . $value . "</html>", [0x80, 0x10FFFF, 0, ~0], "UTF-8"), LIBXML_NOERROR | LIBXML_HTML_NOIMPLIED | LIBXML_HTML_NODEFDTD); // Load html value into dom
+
 		$importedNodes = [];
-		foreach ($valueDom->getElementsByTagName("body")->item(0)->childNodes as $child) {
+		foreach ($valueDom->getElementsByTagName("html")->item(0)->childNodes as $child) {
 			array_push($importedNodes, $this->dom->importNode($child, true)); // Import nodes from value dom to main dom and add to array
 		}
 		return $importedNodes; // Return array of imported nodes
 	}
 
-	private function copyNodeAttributes($oldNode, $newNode): void
+	/**
+	 * Retrieves the content of a specific HTML node.
+	 * Uses an XPath expression to retrieve the content from the HTML.
+	 * If the Xpath expression is not provided, the content of the root node is returned.
+	 * If the Xpath expression doesn't start with "//", it is assumed to be a tag name, and the first node with that tag name is selected.
+	 *
+	 * @param string $xpathExpression The XPath expression to retrieve the content from.
+	 * @return string|null The content of the HTML node as a string, or null if the node does not exist.
+	 */
+	public function getContent(string $xpathExpression = null): string|null
 	{
-		if ($newNode->nodeType == XML_TEXT_NODE || $newNode->nodeType == XML_DOCUMENT_FRAG_NODE) {
-			return; // Skip text nodes
-		}
-		if ($oldNode->hasAttributes()) {
-			foreach ($oldNode->attributes as $attribute) {
-				$newNode->setAttribute($attribute->name, $attribute->value); // Copy attributes from old node to new node
+
+		$nodes = $this->searchXpath($xpathExpression); // Get nodes with xpath expression
+
+		if ($nodes->length == 0) return null;
+
+		// Import content to temporary dom
+		$dom = new DOMDocument();
+		foreach ($nodes as $node) {
+			foreach ($node->childNodes as $child) {
+				$dom->appendChild($dom->importNode($child, true));
 			}
 		}
+
+		// Export content as string
+		$content = $dom->saveHTML(); // Save html content from dom
+		$content = mb_encode_numericentity($content, [0x80, 0x10FFFF, 0, ~0], "UTF-8");
+		$content = str_replace("%20", " ", $content);
+		return trim($content); // Return html content as string
 	}
 
-	private function getNodeContentArrayRecursive(DOMNode $node): array|null
+	/**
+	 * Retrieves the content of a specified HTML node and returns it as an array.
+	 * Gets the content of the first node with the specified tag name.
+	 * The content is returned as an associative array with the tag names as keys.
+	 * If the node contains text content, it is stored under the key "text".
+	 *
+	 * @param string|null $tag The name of the HTML tag to retrieve the content from. If not provided, the root tag name will be used.
+	 * @return array The content of the HTML node as an array.
+	 */
+	public function getContentArray(string $tag = null): array
+	{
+		$tag = $tag ?? $this->dom->documentElement->tagName; // Get root tag name if no tag name is given
+
+		$node = $this->dom->getElementsByTagName($tag)->item(0); // Get first node with tag name
+		if (!$node) return [];
+
+		return $this->getNodeContentArray($node); // Return content as array by getting content recursively
+	}
+
+	private function getNodeContentArray(DOMNode $node): array
 	{
 		$content = [];
 		foreach ($node->childNodes as $child) { // Iterate over child nodes
 			if ($child->nodeType == XML_TEXT_NODE && trim($child->nodeValue) != "") {
 				$content["text"] = trim($child->nodeValue); // Add text content to array
-				continue;
-			}
-			if ($child->nodeType == XML_TEXT_NODE && $child->childNodes->length == 0) continue; // Skip empty text nodes
-			if ($child->childNodes->length == 1) {
+			} elseif ($child->childNodes->length == 1) {
 				$content[$child->nodeName] = $child->nodeValue; // Add single child node content to array
-				continue;
+			} elseif ($child->nodeType == XML_TEXT_NODE && $child->childNodes->length == 0) {
+				// Do not add empty text nodes
+			} else {
+				$content[$child->nodeName] = $this->getNodeContentArray($child); // Add child node content to array recursively
 			}
-			$content[$child->nodeName] = $this->getNodeContentArrayRecursive($child); // Add child node content to array recursively
 		}
 		return $content; // Return content array
+	}
+
+	/**
+	 * Changes the value of an attribute in all nodes that match the given XPath expression.
+	 * The attribute is case-insensitive.
+	 *
+	 * @param string $xpathExpression The XPath expression to select the nodes.
+	 * @param string $attribute The name of the attribute to change.
+	 * @param string $value The new value of the attribute.
+	 */
+	public function changeAttribute(string $xpathExpression, string $attribute, string $value): void
+	{
+		$nodes = $this->searchXpath($xpathExpression);
+
+		foreach ($nodes as $node) {
+			if (!$node instanceof DOMElement) continue;
+			$node->setAttribute($attribute, $value);
+		}
+	}
+
+	private function searchXpath(string|null $xpathExpression): \DOMNodeList
+	{
+		$xpathExpression = $xpathExpression ?? $this->dom->documentElement->tagName; // Get root tag name if no tag name is given
+		if (!str_starts_with($xpathExpression, "//")) {
+			$xpathExpression = "//{$xpathExpression}[1]"; // Convert tag name to xpath expression
+		}
+
+		$xpath = new DOMXPath($this->dom);
+		$result = $xpath->query($xpathExpression); // Get nodes with xpath expression
+		if ($result === false) {
+			throw new \UnexpectedValueException("Invalid XPath expression: {$xpathExpression}");
+		}
+		return $result;
+	}
+
+	/**
+	 * Sets the content of a specific HTML node.
+	 * If the node does not exist, it is created.
+	 * The content is inserted as a child node of the specified parent node.
+	 * If no parent node is specified, the content is inserted as a child of the root node.
+	 *
+	 * @param string $tag The tag of the node to set the content of.
+	 * @param string $content The content to set.
+	 * @param string|null $parent The tag of the parent node to insert the content into.
+	 * @param bool $insertBefore Flag indicating if the content should be inserted before the first child of the parent node (true) or appended as the last child (false).
+	 */
+	public function setContent(string $tag, string $content, string|null $parent, $insertBefore = false): void
+	{
+		$element = $this->dom->getElementsByTagName($tag);
+		if ($element->length > 0) {
+			$element = $element->item(0); // Get element if existing
+		} else {
+			$element = $this->createChildElement($tag, $parent, $insertBefore); // Create element if not existing
+		}
+
+		$nodes = $this->importNodes($content); // Import nodes from content
+
+		foreach ($nodes as $node) {
+			$element->appendChild($node); // Import nodes from content and append to element
+		}
+	}
+
+	private function createChildElement(string $tag, string|null $parent, bool $insertBefore = false): DOMElement
+	{
+		$parent = $parent ?? $this->dom->documentElement->tagName; // Get root tag name if no parent tag name is given
+		$parentList = $this->dom->getElementsByTagName($parent);
+		if ($parentList->length == 0) {
+			throw new \UnexpectedValueException("Parent tag not found: {$parent}");
+		}
+		$parentElement = $parentList->item(0); // Get parent element
+		$element = $this->dom->createElement($tag); // Create element if not existing
+		if ($insertBefore) {
+			$parentElement->insertBefore($element, $parentElement->firstChild); // Insert element before first child
+		} else {
+			$parentElement->appendChild($element); // Append element to parent element
+		}
+		return $element; // Return element
 	}
 }
